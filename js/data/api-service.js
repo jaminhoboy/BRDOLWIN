@@ -90,44 +90,20 @@
     }
   }
 
-  /**
-   * Busca cotação via BRAPI
-   */
-  async function fetchBrapiQuote(ticker) {
-    const url = `${BRAPI_BASE}/quote/${ticker}?fundamental=false`;
-    const data = await fetchWithCache(url, `brapi_${ticker}`, CACHE_TTL_MS);
-
-    if (!data || !data.results || data.results.length === 0) return null;
-
-    const result = data.results[0];
-    return {
-      symbol: result.symbol,
-      shortName: result.shortName,
-      price: result.regularMarketPrice,
-      previousClose: result.regularMarketPreviousClose,
-      change: result.regularMarketChange,
-      changePercent: result.regularMarketChangePercent,
-      dayHigh: result.regularMarketDayHigh,
-      dayLow: result.regularMarketDayLow,
-      volume: result.regularMarketVolume,
-      timestamp: result.regularMarketTime ? new Date(result.regularMarketTime) : new Date(),
-    };
-  }
-
   // ─── API Pública ──────────────────────────────────────
 
   /**
    * Busca cotação do Dólar comercial (USDBRL)
    */
   async function getDolar() {
-    return await fetchBrapiQuote('USDBRL');
+    return await fetchYahooQuote('BRL=X');
   }
 
   /**
    * Busca cotação do IBOVESPA
    */
   async function getIbovespa() {
-    return await fetchBrapiQuote('^BVSP');
+    return await fetchYahooQuote('^BVSP');
   }
 
   /**
