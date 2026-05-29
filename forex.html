@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forex | BRDOLWIN Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <style>
+        .forex-pair-panel {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .forex-pair-panel.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-card">
+            <div class="sidebar-logo">
+                <i data-lucide="activity"></i> BRDOLWIN
+            </div>
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-link"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                <a href="operational.html" class="nav-link"><i data-lucide="target"></i> Operacional</a>
+                <a href="macro.html" class="nav-link"><i data-lucide="globe"></i> Radar Macro</a>
+                <a href="heatmap.html" class="nav-link"><i data-lucide="flame"></i> Heatmap Inst.</a>
+                <a href="forex.html" class="nav-link active"><i data-lucide="currency"></i> Forex</a>
+                <a href="admin.html" class="nav-link" id="adminSidebarLink" style="display: none; color: #F87171;"><i data-lucide="lock"></i> Bastidores (Admin)</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="flex-between mb-2">
+                    <span class="text-muted text-sm">Plano Atual</span>
+                    <span id="userPlanBadge" class="badge">PRO</span>
+                </div>
+                <button onclick="window.BRDOLWINAuth.logout()" class="btn-secondary w-100 text-sm flex-center gap-2">
+                    <i data-lucide="log-out" style="width: 14px;"></i> Desconectar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h1 class="text-xl font-bold">Forex — Análise de Paridades</h1>
+                <div class="flex-center gap-4">
+                    <div class="flex-center gap-2">
+                        <span class="pulse-dot"></span>
+                        <span class="text-sm text-green font-medium">Mercado Aberto</span>
+                    </div>
+                    <div class="financial-data text-sm text-muted" id="clockDisplay">00:00:00</div>
+                    <div class="divider-v"></div>
+                    <div class="text-sm font-medium" id="userNameDisplay">Usuário</div>
+                </div>
+            </header>
+
+            <div class="content-scroll">
+                <!-- Tab Navigation -->
+                <div class="glass-card" style="padding: 1rem; display: flex; align-items: center; justify-content: space-between; border-radius: 16px; margin-bottom: 1.5rem; background: rgba(27,42,65,0.4);">
+                    <h3 class="text-md font-bold flex-center gap-2" style="margin: 0;"><i data-lucide="currency" class="text-blue"></i> Seleção de Paridade</h3>
+                    <div class="flex-center gap-2">
+                        <button class="btn-primary text-xs px-3 py-1.5 active" onclick="window.switchForexPair('eurusd')" id="tabBtnEURUSD">EUR/USD</button>
+                        <button class="btn-secondary text-xs px-3 py-1.5" onclick="window.switchForexPair('usdjpy')" id="tabBtnUSDJPY">USD/JPY</button>
+                        <button class="btn-secondary text-xs px-3 py-1.5" onclick="window.switchForexPair('gbpusd')" id="tabBtnGBPUSD">GBP/USD</button>
+                    </div>
+                </div>
+
+                <!-- EUR/USD Panel -->
+                <div id="panelEURUSD" class="forex-pair-panel active">
+                    <div class="grid-3">
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Preço Atual (EUR/USD)</span>
+                            <div class="metric-value"><span id="fxEURUSDPrice">Carregando...</span></div>
+                        </div>
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Variação Diária</span>
+                            <div class="metric-value"><span id="fxEURUSDChange" class="text-muted">--%</span></div>
+                        </div>
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Tendência de Curto Prazo</span>
+                            <div class="metric-value" id="fxEURUSDTrend"><span class="text-muted">Aguardando dados...</span></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card">
+                        <h3 class="text-lg font-bold mb-4">Plano de Execução — EUR/USD</h3>
+                        <div class="grid-3">
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Região de Entrada</span>
+                                <div class="text-xl font-bold text-light mt-1" id="fxEURUSDEntry">Aguardando...</div>
+                            </div>
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Stop Institucional</span>
+                                <div class="text-xl font-bold text-red mt-1" id="fxEURUSDStop">---</div>
+                            </div>
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Alvo Principal</span>
+                                <div class="text-xl font-bold text-green mt-1" id="fxEURUSDTarget">---</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="glass-card" style="border: 1px solid rgba(255,255,255,0.05);">
+                            <h4 class="text-sm text-muted mb-2"><i data-lucide="clock" style="width: 14px;"></i> Janela Operacional Ideal</h4>
+                            <div class="text-lg font-bold text-blue" id="fxEURUSDTime1">08:00 — 12:00</div>
+                            <p class="text-xs text-muted mt-1 mb-3">Sessão de Londres (Alta Liquidez)</p>
+                            <div class="text-lg font-bold text-blue" id="fxEURUSDTime2">14:30 — 17:00</div>
+                            <p class="text-xs text-muted mt-1">Sessão de Nova York (Volatilidade Ativa)</p>
+                        </div>
+                        <div class="glass-card" style="border: 1px solid rgba(255,255,255,0.05);">
+                            <h4 class="text-sm text-muted mb-4"><i data-lucide="shield" style="width: 14px;"></i> Lote Recomendado (Risco Ajustado)</h4>
+                            <div class="flex-between text-sm mb-2">
+                                <span class="text-muted">Iniciante:</span>
+                                <span class="font-bold text-light" id="fxEURUSDLotBeg">0.01 — 0.05 lotes (Micro)</span>
+                            </div>
+                            <div class="flex-between text-sm mb-2">
+                                <span class="text-muted">Intermediário:</span>
+                                <span class="font-bold text-light" id="fxEURUSDLotInt">0.10 — 0.50 lotes (Mini)</span>
+                            </div>
+                            <div class="flex-between text-sm">
+                                <span class="text-muted">Avançado:</span>
+                                <span class="font-bold text-blue" id="fxEURUSDLotAdv">1.00+ lotes (Standard)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USD/JPY Panel -->
+                <div id="panelUSDJPY" class="forex-pair-panel">
+                    <div class="grid-3">
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Preço Atual (USD/JPY)</span>
+                            <div class="metric-value"><span id="fxUSDJPYPrice">Carregando...</span></div>
+                        </div>
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Variação Diária</span>
+                            <div class="metric-value"><span id="fxUSDJPYChange" class="text-muted">--%</span></div>
+                        </div>
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Tendência de Curto Prazo</span>
+                            <div class="metric-value" id="fxUSDJPYTrend"><span class="text-muted">Aguardando dados...</span></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card">
+                        <h3 class="text-lg font-bold mb-4">Plano de Execução — USD/JPY</h3>
+                        <div class="grid-3">
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Região de Entrada</span>
+                                <div class="text-xl font-bold text-light mt-1" id="fxUSDJPYEntry">Aguardando...</div>
+                            </div>
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Stop Institucional</span>
+                                <div class="text-xl font-bold text-red mt-1" id="fxUSDJPYStop">---</div>
+                            </div>
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Alvo Principal</span>
+                                <div class="text-xl font-bold text-green mt-1" id="fxUSDJPYTarget">---</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="glass-card" style="border: 1px solid rgba(255,255,255,0.05);">
+                            <h4 class="text-sm text-muted mb-2"><i data-lucide="clock" style="width: 14px;"></i> Janela Operacional Ideal</h4>
+                            <div class="text-lg font-bold text-blue">21:00 — 02:00</div>
+                            <p class="text-xs text-muted mt-1 mb-3">Sessão de Tóquio (Forte Fluxo Asiático)</p>
+                            <div class="text-lg font-bold text-blue">08:00 — 10:00</div>
+                            <p class="text-xs text-muted mt-1">Overlap Londres (Liquidez Global)</p>
+                        </div>
+                        <div class="glass-card" style="border: 1px solid rgba(255,255,255,0.05);">
+                            <h4 class="text-sm text-muted mb-4"><i data-lucide="shield" style="width: 14px;"></i> Lote Recomendado (Risco Ajustado)</h4>
+                            <div class="flex-between text-sm mb-2">
+                                <span class="text-muted">Iniciante:</span>
+                                <span class="font-bold text-light">0.01 — 0.05 lotes (Micro)</span>
+                            </div>
+                            <div class="flex-between text-sm mb-2">
+                                <span class="text-muted">Intermediário:</span>
+                                <span class="font-bold text-light">0.10 — 0.50 lotes (Mini)</span>
+                            </div>
+                            <div class="flex-between text-sm">
+                                <span class="text-muted">Avançado:</span>
+                                <span class="font-bold text-blue">1.00+ lotes (Standard)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GBP/USD Panel -->
+                <div id="panelGBPUSD" class="forex-pair-panel">
+                    <div class="grid-3">
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Preço Atual (GBP/USD)</span>
+                            <div class="metric-value"><span id="fxGBPUSDPrice">Carregando...</span></div>
+                        </div>
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Variação Diária</span>
+                            <div class="metric-value"><span id="fxGBPUSDChange" class="text-muted">--%</span></div>
+                        </div>
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Tendência de Curto Prazo</span>
+                            <div class="metric-value" id="fxGBPUSDTrend"><span class="text-muted">Aguardando dados...</span></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card">
+                        <h3 class="text-lg font-bold mb-4">Plano de Execução — GBP/USD</h3>
+                        <div class="grid-3">
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Região de Entrada</span>
+                                <div class="text-xl font-bold text-light mt-1" id="fxGBPUSDEntry">Aguardando...</div>
+                            </div>
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Stop Institucional</span>
+                                <div class="text-xl font-bold text-red mt-1" id="fxGBPUSDStop">---</div>
+                            </div>
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Alvo Principal</span>
+                                <div class="text-xl font-bold text-green mt-1" id="fxGBPUSDTarget">---</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="glass-card" style="border: 1px solid rgba(255,255,255,0.05);">
+                            <h4 class="text-sm text-muted mb-2"><i data-lucide="clock" style="width: 14px;"></i> Janela Operacional Ideal</h4>
+                            <div class="text-lg font-bold text-blue">08:00 — 12:00</div>
+                            <p class="text-xs text-muted mt-1 mb-3">Sessão de Londres (Alta Liquidez)</p>
+                            <div class="text-lg font-bold text-blue">14:30 — 17:00</div>
+                            <p class="text-xs text-muted mt-1">Sessão de Nova York (Volatilidade Ativa)</p>
+                        </div>
+                        <div class="glass-card" style="border: 1px solid rgba(255,255,255,0.05);">
+                            <h4 class="text-sm text-muted mb-4"><i data-lucide="shield" style="width: 14px;"></i> Lote Recomendado (Risco Ajustado)</h4>
+                            <div class="flex-between text-sm mb-2">
+                                <span class="text-muted">Iniciante:</span>
+                                <span class="font-bold text-light">0.01 — 0.05 lotes (Micro)</span>
+                            </div>
+                            <div class="flex-between text-sm mb-2">
+                                <span class="text-muted">Intermediário:</span>
+                                <span class="font-bold text-light">0.10 — 0.50 lotes (Mini)</span>
+                            </div>
+                            <div class="flex-between text-sm">
+                                <span class="text-muted">Avançado:</span>
+                                <span class="font-bold text-blue">1.00+ lotes (Standard)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confidence Panel -->
+                <div class="glass-card mt-4" style="margin-top: 1.5rem;">
+                    <span class="metric-label">Confiança Institucional (Forex)</span>
+                    <div class="metric-value text-blue mt-2" id="fxConfidence">Aguardando Análise...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase-client.js"></script>
+<script src="js/core/auth.js"></script>
+    <script src="js/core/router.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/data/api-service.js"></script>
+    <script src="js/data/market-state.js"></script>
+    <script src="js/pages/forex-page.js"></script>
+    <script>
+        lucide.createIcons();
+        window.BRDOLWINRouter.checkAuth();
+        
+        // Simulação do relógio
+        setInterval(() => {
+            const clockEl = document.getElementById('clockDisplay');
+            if(clockEl) clockEl.textContent = new Date().toLocaleTimeString('pt-BR');
+        }, 1000);
+        
+        // Definir usuário
+        const userEl = document.getElementById('userNameDisplay');
+        if(userEl && window.BRDOLWINAuth) {
+            const user = window.BRDOLWINAuth.getCurrentUser();
+            if(user) userEl.textContent = user.name;
+        }
+    </script>
+</body>
+</html>

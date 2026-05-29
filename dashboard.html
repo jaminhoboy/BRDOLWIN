@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | BRDOLWIN Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-card">
+            <div class="sidebar-logo">
+                <i data-lucide="activity"></i> BRDOLWIN
+            </div>
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-link active"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                <a href="operational.html" class="nav-link"><i data-lucide="target"></i> Operacional</a>
+                <a href="macro.html" class="nav-link"><i data-lucide="globe"></i> Radar Macro</a>
+                <a href="heatmap.html" class="nav-link"><i data-lucide="flame"></i> Heatmap Inst.</a>
+                <a href="forex.html" class="nav-link"><i data-lucide="currency"></i> Forex</a>
+                <a href="admin.html" class="nav-link" id="adminSidebarLink" style="display: none; color: #F87171;"><i data-lucide="lock"></i> Bastidores (Admin)</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="flex-between mb-2">
+                    <span class="text-muted text-sm">Plano Atual</span>
+                    <span id="userPlanBadge" class="badge">PRO</span>
+                </div>
+                <button onclick="window.BRDOLWINAuth.logout()" class="btn-secondary w-100 text-sm flex-center gap-2">
+                    <i data-lucide="log-out" style="width: 14px;"></i> Desconectar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h1 class="text-xl font-bold">Dashboard Institucional</h1>
+                <div class="flex-center gap-4">
+                    <div class="flex-center gap-2">
+                        <span class="pulse-dot"></span>
+                        <span class="text-sm text-green font-medium">Mercado Aberto</span>
+                    </div>
+                    <div class="financial-data text-sm text-muted" id="clockDisplay">00:00:00</div>
+                    <div class="divider-v"></div>
+                    <div class="text-sm font-medium" id="userNameDisplay">Usuário</div>
+                </div>
+            </header>
+
+            <div class="content-scroll">
+                <div class="dashboard-grid">
+                    <!-- Top Metrics -->
+                    <div class="top-metrics">
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">WIN (Mini Índice)</span>
+                            <div class="metric-value"><span id="winPrice">135.250</span> <span class="text-sm text-green">+0,45%</span></div>
+                        </div>
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">WDO (Mini Dólar)</span>
+                            <div class="metric-value"><span id="wdoPrice">5.732,50</span> <span class="text-sm text-red">-0,15%</span></div>
+                        </div>
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Confiança Institucional</span>
+                            <div class="metric-value text-blue" id="confidenceScore">Alta (82%)</div>
+                        </div>
+                        <div class="glass-card metric-card">
+                            <span class="metric-label">Regime de Mercado</span>
+                            <div class="mt-2"><span class="regime-badge" id="marketRegime"><i data-lucide="trending-up"></i> Tendência Alta</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Left: Probabilities -->
+                    <div class="glass-card probability-panel">
+                        <div class="chart-header" style="margin-bottom: 1rem;">
+                            <h3 style="font-size: 1rem;">Probabilidades</h3>
+                            <div class="flex-center gap-2" id="probTabs">
+                                <button class="btn-secondary text-xs px-2 py-1 active" onclick="window.BRDOLWINDashboard.selectHorizon('30m')">30m</button>
+                                <button class="btn-secondary text-xs px-2 py-1" onclick="window.BRDOLWINDashboard.selectHorizon('1h')">1h</button>
+                                <button class="btn-secondary text-xs px-2 py-1" onclick="window.BRDOLWINDashboard.selectHorizon('2h')">2h</button>
+                                <button class="btn-secondary text-xs px-2 py-1" onclick="window.BRDOLWINDashboard.selectHorizon('3h')">3h</button>
+                            </div>
+                        </div>
+                        <div class="prob-section">
+                            <div id="winGauge" class="gauge-container" style="min-height: 180px;"></div>
+                            
+                            <div class="probability-bar-group mt-3">
+                                <div class="probability-bar-label"><span>Alta</span> <span id="winProbHigh" class="text-green">--%</span></div>
+                                <div class="progress-bar-container"><div id="winBarHigh" class="progress-bar" style="background:#34D399; width:0%"></div></div>
+                            </div>
+                            <div class="probability-bar-group mt-2">
+                                <div class="probability-bar-label"><span>Baixa</span> <span id="winProbLow" class="text-red">--%</span></div>
+                                <div class="progress-bar-container"><div id="winBarLow" class="progress-bar" style="background:#F87171; width:0%"></div></div>
+                            </div>
+                            <div class="probability-bar-group mt-2">
+                                <div class="probability-bar-label"><span>Lateral</span> <span id="winProbSide" class="text-amber">--%</span></div>
+                                <div class="progress-bar-container"><div id="winBarSide" class="progress-bar" style="background:#FBBF24; width:0%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center/Right: Execution Plan with Tabs -->
+                    <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="glass-card" style="padding: 1rem; display: flex; align-items: center; justify-content: space-between; border-radius: 16px; background: rgba(27,42,65,0.4);">
+                            <h3 class="text-md font-bold flex-center gap-2" style="margin: 0;"><i data-lucide="target" class="text-blue"></i> Plano de Execução</h3>
+                            <div class="flex-center gap-2" id="execAssetTabs">
+                                <button class="btn-primary text-xs px-3 py-1.5 active" onclick="switchExecAsset('win')" id="tabBtnWin">Mini Índice (WIN)</button>
+                                <button class="btn-secondary text-xs px-3 py-1.5" onclick="switchExecAsset('wdo')" id="tabBtnWdo">Mini Dólar (WDO)</button>
+                            </div>
+                        </div>
+
+                        <!-- WIN Execution Content -->
+                        <div id="execWinContent" class="glass-card">
+                            <div class="flex-between mb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold">Plano de Execução — WIN (Mini Índice)</h3>
+                                    <p class="text-sm text-muted">Inteligência Operacional Ativa</p>
+                                </div>
+                                <div class="badge" style="background: rgba(52, 211, 153, 0.1); color: #34D399; border: 1px solid rgba(52, 211, 153, 0.3);">
+                                    Status: PRONTO PARA OPERAR
+                                </div>
+                            </div>
+                            
+                            <div class="grid-3" style="margin-bottom: 1.5rem;">
+                                <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                    <span class="text-sm text-muted">Região de Entrada</span>
+                                    <div class="text-xl font-bold text-light mt-1" id="execWinEntry">Aguardando dados...</div>
+                                </div>
+                                <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                    <span class="text-sm text-muted">Stop Institucional</span>
+                                    <div class="text-xl font-bold text-red mt-1" id="execWinStop">---</div>
+                                </div>
+                                <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                    <span class="text-sm text-muted">Alvo Principal</span>
+                                    <div class="text-xl font-bold text-green mt-1" id="execWinTarget">---</div>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div style="border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                    <h4 class="text-sm text-muted mb-2"><i data-lucide="clock" style="width: 14px;"></i> Melhor Horário para Operar</h4>
+                                    <div class="text-lg font-bold text-blue" id="execWinTime">09:30 — 11:30</div>
+                                    <p class="text-xs text-muted mt-1">Abertura de Nova York & Maior Liquidez</p>
+                                </div>
+                                <div style="border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                    <h4 class="text-sm text-muted mb-2"><i data-lucide="shield" style="width: 14px;"></i> Lote Recomendado (Risco Ajustado)</h4>
+                                    <div class="flex-between text-sm mb-1">
+                                        <span class="text-muted">Iniciante:</span>
+                                        <span class="font-bold text-light" id="lotWinBeginner">1 a 2 minis</span>
+                                    </div>
+                                    <div class="flex-between text-sm mb-1">
+                                        <span class="text-muted">Intermediário:</span>
+                                        <span class="font-bold text-light" id="lotWinIntermediate">5 a 10 minis</span>
+                                    </div>
+                                    <div class="flex-between text-sm">
+                                        <span class="text-muted">Avançado:</span>
+                                        <span class="font-bold text-blue" id="lotWinAdvanced">20+ minis</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WDO Execution Content -->
+                        <div id="execWdoContent" class="glass-card" style="display: none;">
+                            <div class="flex-between mb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold">Plano de Execução — WDO (Mini Dólar)</h3>
+                                    <p class="text-sm text-muted">Inteligência Operacional Ativa</p>
+                                </div>
+                                <div class="badge" style="background: rgba(248, 113, 113, 0.1); color: #F87171; border: 1px solid rgba(248, 113, 113, 0.3);">
+                                    Status: ALTO RISCO (EVITAR AGORA)
+                                </div>
+                            </div>
+                            
+                            <div class="grid-3" style="margin-bottom: 1.5rem;">
+                                <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                    <span class="text-sm text-muted">Região de Entrada</span>
+                                    <div class="text-xl font-bold text-light mt-1" id="execWdoEntry">Aguardando dados...</div>
+                                </div>
+                                <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                    <span class="text-sm text-muted">Stop Institucional</span>
+                                    <div class="text-xl font-bold text-red mt-1" id="execWdoStop">---</div>
+                                </div>
+                                <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                    <span class="text-sm text-muted">Alvo Principal</span>
+                                    <div class="text-xl font-bold text-green mt-1" id="execWdoTarget">---</div>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div style="border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                    <h4 class="text-sm text-muted mb-2"><i data-lucide="clock" style="width: 14px;"></i> Melhor Horário para Operar</h4>
+                                    <div class="text-lg font-bold text-blue" id="execWdoTime">09:00 — 10:30</div>
+                                    <p class="text-xs text-muted mt-1">Abertura e Formação das prévias da PTAX</p>
+                                </div>
+                                <div style="border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                    <h4 class="text-sm text-muted mb-2"><i data-lucide="shield" style="width: 14px;"></i> Lote Recomendado (Risco Ajustado)</h4>
+                                    <div class="flex-between text-sm mb-1">
+                                        <span class="text-muted">Iniciante:</span>
+                                        <span class="font-bold text-light" id="lotWdoBeginner">1 mini</span>
+                                    </div>
+                                    <div class="flex-between text-sm mb-1">
+                                        <span class="text-muted">Intermediário:</span>
+                                        <span class="font-bold text-light" id="lotWdoIntermediate">3 a 5 minis</span>
+                                    </div>
+                                    <div class="flex-between text-sm">
+                                        <span class="text-muted">Avançado:</span>
+                                        <span class="font-bold text-blue" id="lotWdoAdvanced">10+ minis</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Ticker -->
+                    <div class="bottom-ticker">
+                        <div class="ticker-track" id="globalTicker">
+                            <div class="ticker-item"><span class="ticker-label">S&P500</span> <span id="tickerSP500" class="text-muted">Carregando...</span></div>
+                            <div class="ticker-item"><span class="ticker-label">DXY</span> <span id="tickerDXY" class="text-muted">Carregando...</span></div>
+                            <div class="ticker-item"><span class="ticker-label">VIX</span> <span id="tickerVIX" class="text-muted">Carregando...</span></div>
+                            <div class="ticker-item"><span class="ticker-label">Petróleo</span> <span id="tickerOil" class="text-muted">Carregando...</span></div>
+                            <div class="ticker-item"><span class="ticker-label">Treasury 10Y</span> <span id="tickerTreasury" class="text-muted">Carregando...</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase-client.js"></script>
+<script src="js/core/auth.js"></script>
+    <script src="js/core/router.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/data/api-service.js"></script>
+    <script src="js/data/market-state.js"></script>
+    <script src="js/engines/engines.js"></script>
+    <script src="js/pages/dashboard-page.js"></script>
+    <script>
+        lucide.createIcons();
+        window.BRDOLWINRouter.checkAuth();
+
+        // Alternância entre WIN e WDO nos planos de execução
+        window.switchExecAsset = function(asset) {
+            const tabWin = document.getElementById('tabBtnWin');
+            const tabWdo = document.getElementById('tabBtnWdo');
+            const contentWin = document.getElementById('execWinContent');
+            const contentWdo = document.getElementById('execWdoContent');
+            
+            if (asset === 'win') {
+                if (tabWin) tabWin.className = 'btn-primary text-xs px-3 py-1.5 active';
+                if (tabWdo) tabWdo.className = 'btn-secondary text-xs px-3 py-1.5';
+                if (contentWin) contentWin.style.display = 'block';
+                if (contentWdo) contentWdo.style.display = 'none';
+            } else {
+                if (tabWin) tabWin.className = 'btn-secondary text-xs px-3 py-1.5';
+                if (tabWdo) tabWdo.className = 'btn-primary text-xs px-3 py-1.5 active';
+                if (contentWin) contentWin.style.display = 'none';
+                if (contentWdo) contentWdo.style.display = 'block';
+            }
+        };
+        
+        // Simulação do relógio
+        setInterval(() => {
+            document.getElementById('clockDisplay').textContent = new Date().toLocaleTimeString('pt-BR');
+        }, 1000);
+    </script>
+</body>
+</html>

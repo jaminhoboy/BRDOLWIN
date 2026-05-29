@@ -1,0 +1,148 @@
+/* dashboard.css */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  grid-template-rows: auto 1fr auto;
+  gap: 1.5rem;
+  height: 100%;
+}
+
+.top-metrics {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #E2E8F0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.probability-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.prob-section h3 {
+  font-size: 1rem;
+  color: #E2E8F0;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.gauge-container {
+  height: 200px;
+  width: 100%;
+}
+
+.probability-bar-group {
+  margin-top: 1rem;
+}
+
+.probability-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #94A3B8;
+  margin-bottom: 0.25rem;
+}
+
+.chart-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chart-container {
+  flex: 1;
+  background: #0A0F1E;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.agents-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.agents-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.agents-panel::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+
+.bottom-ticker {
+  grid-column: 1 / -1;
+  background: rgba(10, 15, 30, 0.8);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 0.75rem 2rem;
+  margin: 0 -2rem -2rem -2rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticker-track {
+  display: inline-block;
+  animation: ticker-scroll 30s linear infinite;
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 2rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+}
+
+.ticker-label { color: #94A3B8; }
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.regime-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(167, 139, 250, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  color: #A78BFA;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}

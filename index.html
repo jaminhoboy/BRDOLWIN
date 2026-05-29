@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRDOLWIN | Inteligência Institucional</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-bg-grid"></div>
+        <div class="login-container">
+            <div class="login-header">
+                <h1 class="login-logo">BRDOLWIN</h1>
+                <p class="login-subtitle">Inteligência Institucional Probabilística</p>
+            </div>
+
+            <div id="loginError">Credenciais inválidas.</div>
+
+            <form class="login-form" id="loginForm">
+                <div class="input-group">
+                    <label for="email">Acesso ao Terminal</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="mail"></i>
+                        <input type="email" id="email" class="input-field" placeholder="institucional@brdolwin.com" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-with-icon">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary login-btn">Conectar ao Terminal</button>
+            </form>
+
+            <div class="divider">Acesso Demonstração</div>
+
+            <div class="demo-accounts">
+                <div class="demo-card" onclick="fillDemo('starter')">
+                    <div class="demo-card-info">
+                        <span class="demo-title">Plano Starter</span>
+                        <span class="demo-desc">Dashboard e Probabilidades</span>
+                    </div>
+                    <span class="badge badge-starter">Demo</span>
+                </div>
+                <div class="demo-card" onclick="fillDemo('pro')">
+                    <div class="demo-card-info">
+                        <span class="demo-title">Plano Pro</span>
+                        <span class="demo-desc">+ Tempo Real e Operacional</span>
+                    </div>
+                    <span class="badge badge-pro">Demo</span>
+                </div>
+                <div class="demo-card" onclick="fillDemo('elite')">
+                    <div class="demo-card-info">
+                        <span class="demo-title">Plano Elite</span>
+                        <span class="demo-desc">Acesso Total Institucional</span>
+                    </div>
+                    <span class="badge badge-elite">Demo</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <button onclick="fillDemo('admin')" style="background:none; border:none; color: #94A3B8; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">Acesso Administrativo (Dono)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/core/supabase-client.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script>
+        lucide.createIcons();
+
+        function fillDemo(plan) {
+            document.getElementById('email').value = `${plan}@brdolwin.com`;
+            document.getElementById('password').value = `${plan}123`;
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            
+            const btn = document.querySelector('.login-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Autenticando...';
+            btn.disabled = true;
+
+            const resultado = await window.BRDOLWINAuth.login(email, pass);
+            
+            if(resultado && resultado.sucesso) {
+                window.location.href = 'dashboard.html';
+            } else {
+                document.getElementById('loginError').textContent = resultado ? resultado.mensagem : 'Erro ao conectar.';
+                document.getElementById('loginError').style.display = 'block';
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // Redirect if already logged in
+        if(window.BRDOLWINAuth && window.BRDOLWINAuth.isAuthenticated()) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

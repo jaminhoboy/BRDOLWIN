@@ -1,0 +1,250 @@
+/* ============================================================
+   BRDOLWIN — Design Tokens (variables.css)
+   Sistema de Inteligência Institucional Probabilística
+   Tokens centralizados para consistência visual premium
+   ============================================================ */
+
+:root {
+
+  /* ──────────────────────────────────────────────────────────
+     CORES — Paleta institucional dark premium
+     ────────────────────────────────────────────────────────── */
+
+  /* Backgrounds */
+  --cor-bg-principal:       #0A0F1E;
+  --cor-bg-secundario:      #0D1326;
+  --cor-bg-terciario:       #111827;
+
+  /* Superfícies / Cards */
+  --cor-surface:            #1B2A41;
+  --cor-surface-hover:      #26364D;
+  --cor-surface-active:     #2D3F59;
+  --cor-surface-glass:      rgba(27, 42, 65, 0.6);
+  --cor-surface-glass-hover:rgba(38, 54, 77, 0.7);
+
+  /* Bordas */
+  --cor-borda:              rgba(255, 255, 255, 0.08);
+  --cor-borda-hover:        rgba(255, 255, 255, 0.14);
+  --cor-borda-focus:        rgba(59, 130, 246, 0.5);
+  --cor-borda-sutil:        rgba(255, 255, 255, 0.04);
+
+  /* Texto */
+  --cor-texto-primario:     #E2E8F0;
+  --cor-texto-secundario:   #94A3B8;
+  --cor-texto-terciario:    #64748B;
+  --cor-texto-desabilitado: #475569;
+  --cor-texto-inverso:      #0A0F1E;
+
+  /* Cores de Destaque */
+  --cor-accent-azul:        #3B82F6;
+  --cor-accent-azul-hover:  #2563EB;
+  --cor-accent-azul-suave:  rgba(59, 130, 246, 0.15);
+  --cor-accent-azul-glow:   rgba(59, 130, 246, 0.4);
+
+  --cor-sucesso:            #34D399;
+  --cor-sucesso-hover:      #10B981;
+  --cor-sucesso-suave:      rgba(52, 211, 153, 0.15);
+  --cor-sucesso-glow:       rgba(52, 211, 153, 0.4);
+
+  --cor-alerta-vermelho:    #F87171;
+  --cor-alerta-vermelho-hover: #EF4444;
+  --cor-alerta-vermelho-suave: rgba(248, 113, 113, 0.15);
+  --cor-alerta-vermelho-glow:  rgba(248, 113, 113, 0.4);
+
+  --cor-aviso-amber:        #FBBF24;
+  --cor-aviso-amber-hover:  #F59E0B;
+  --cor-aviso-amber-suave:  rgba(251, 191, 36, 0.15);
+  --cor-aviso-amber-glow:   rgba(251, 191, 36, 0.4);
+
+  --cor-accent-roxo:        #A78BFA;
+  --cor-accent-roxo-hover:  #8B5CF6;
+  --cor-accent-roxo-suave:  rgba(167, 139, 250, 0.15);
+  --cor-accent-roxo-glow:   rgba(167, 139, 250, 0.4);
+
+  /* Gradientes */
+  --gradiente-azul:         linear-gradient(135deg, #3B82F6, #2563EB);
+  --gradiente-azul-roxo:    linear-gradient(135deg, #3B82F6, #8B5CF6);
+  --gradiente-verde:        linear-gradient(135deg, #34D399, #10B981);
+  --gradiente-vermelho:     linear-gradient(135deg, #F87171, #EF4444);
+  --gradiente-amber:        linear-gradient(135deg, #FBBF24, #F59E0B);
+  --gradiente-roxo:         linear-gradient(135deg, #A78BFA, #8B5CF6);
+  --gradiente-surface:      linear-gradient(180deg, rgba(27, 42, 65, 0.8), rgba(27, 42, 65, 0.4));
+  --gradiente-glass:        linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  --gradiente-elite:        linear-gradient(135deg, #FBBF24, #F59E0B, #D97706);
+
+  /* Overlays */
+  --cor-overlay:            rgba(10, 15, 30, 0.7);
+  --cor-overlay-forte:      rgba(10, 15, 30, 0.9);
+
+
+  /* ──────────────────────────────────────────────────────────
+     TIPOGRAFIA — Fontes institucionais
+     ────────────────────────────────────────────────────────── */
+
+  --fonte-ui:               'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --fonte-dados:            'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  /* Tamanhos de fonte */
+  --fonte-xs:               0.6875rem;    /* 11px */
+  --fonte-sm:               0.75rem;      /* 12px */
+  --fonte-base:             0.875rem;     /* 14px */
+  --fonte-md:               1rem;         /* 16px */
+  --fonte-lg:               1.125rem;     /* 18px */
+  --fonte-xl:               1.25rem;      /* 20px */
+  --fonte-2xl:              1.5rem;       /* 24px */
+  --fonte-3xl:              1.875rem;     /* 30px */
+  --fonte-4xl:              2.25rem;      /* 36px */
+  --fonte-5xl:              3rem;         /* 48px */
+
+  /* Pesos de fonte */
+  --peso-light:             300;
+  --peso-regular:           400;
+  --peso-medium:            500;
+  --peso-semibold:          600;
+  --peso-bold:              700;
+
+  /* Alturas de linha */
+  --linha-apertada:         1.2;
+  --linha-normal:           1.5;
+  --linha-relaxada:         1.75;
+
+  /* Espaçamento entre letras */
+  --tracking-apertado:      -0.025em;
+  --tracking-normal:        0;
+  --tracking-largo:         0.025em;
+  --tracking-extra-largo:   0.1em;
+
+
+  /* ──────────────────────────────────────────────────────────
+     ESPAÇAMENTO — Sistema de 4px
+     ────────────────────────────────────────────────────────── */
+
+  --espaco-1:               4px;
+  --espaco-2:               8px;
+  --espaco-3:               12px;
+  --espaco-4:               16px;
+  --espaco-5:               20px;
+  --espaco-6:               24px;
+  --espaco-8:               32px;
+  --espaco-10:              40px;
+  --espaco-12:              48px;
+  --espaco-16:              64px;
+  --espaco-20:              80px;
+  --espaco-24:              96px;
+
+
+  /* ──────────────────────────────────────────────────────────
+     BORDER RADIUS — Cantos arredondados
+     ────────────────────────────────────────────────────────── */
+
+  --radius-xs:              4px;
+  --radius-sm:              6px;
+  --radius-md:              8px;
+  --radius-lg:              12px;
+  --radius-xl:              16px;
+  --radius-2xl:             24px;
+  --radius-full:            9999px;
+
+
+  /* ──────────────────────────────────────────────────────────
+     SOMBRAS — Profundidade e efeitos glow
+     ────────────────────────────────────────────────────────── */
+
+  --sombra-sm:              0 1px 2px rgba(0, 0, 0, 0.3),
+                            0 1px 3px rgba(0, 0, 0, 0.2);
+  --sombra-md:              0 4px 6px rgba(0, 0, 0, 0.3),
+                            0 2px 4px rgba(0, 0, 0, 0.2);
+  --sombra-lg:              0 10px 15px rgba(0, 0, 0, 0.35),
+                            0 4px 6px rgba(0, 0, 0, 0.2);
+  --sombra-xl:              0 20px 25px rgba(0, 0, 0, 0.4),
+                            0 8px 10px rgba(0, 0, 0, 0.25);
+  --sombra-2xl:             0 25px 50px rgba(0, 0, 0, 0.5);
+
+  /* Sombras com glow colorido */
+  --sombra-glow-azul:       0 0 20px rgba(59, 130, 246, 0.3),
+                            0 0 40px rgba(59, 130, 246, 0.1);
+  --sombra-glow-verde:      0 0 20px rgba(52, 211, 153, 0.3),
+                            0 0 40px rgba(52, 211, 153, 0.1);
+  --sombra-glow-vermelho:   0 0 20px rgba(248, 113, 113, 0.3),
+                            0 0 40px rgba(248, 113, 113, 0.1);
+  --sombra-glow-roxo:       0 0 20px rgba(167, 139, 250, 0.3),
+                            0 0 40px rgba(167, 139, 250, 0.1);
+  --sombra-glow-amber:      0 0 20px rgba(251, 191, 36, 0.3),
+                            0 0 40px rgba(251, 191, 36, 0.1);
+
+  /* Sombra interna para inputs */
+  --sombra-inner:           inset 0 2px 4px rgba(0, 0, 0, 0.2);
+
+
+  /* ──────────────────────────────────────────────────────────
+     TRANSIÇÕES — Durações e easings
+     ────────────────────────────────────────────────────────── */
+
+  --transicao-rapida:       150ms ease;
+  --transicao-normal:       300ms ease;
+  --transicao-lenta:        500ms ease;
+  --transicao-mola:         300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Easings específicos */
+  --easing-padrao:          cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-entrada:         cubic-bezier(0, 0, 0.2, 1);
+  --easing-saida:           cubic-bezier(0.4, 0, 1, 1);
+  --easing-mola:            cubic-bezier(0.34, 1.56, 0.64, 1);
+
+
+  /* ──────────────────────────────────────────────────────────
+     Z-INDEX — Camadas de empilhamento
+     ────────────────────────────────────────────────────────── */
+
+  --z-base:                 1;
+  --z-dropdown:             50;
+  --z-sidebar:              100;
+  --z-header:               200;
+  --z-overlay:              250;
+  --z-modal:                300;
+  --z-tooltip:              400;
+  --z-toast:                500;
+  --z-maximo:               9999;
+
+
+  /* ──────────────────────────────────────────────────────────
+     BREAKPOINTS — Referência (usados via media queries)
+     ────────────────────────────────────────────────────────── */
+
+  /* Não é possível usar variáveis CSS em media queries,
+     mas documentamos aqui para referência:
+     --bp-mobile:   480px
+     --bp-tablet:   768px
+     --bp-desktop:  1024px
+     --bp-wide:     1280px
+     --bp-ultra:    1536px
+  */
+
+
+  /* ──────────────────────────────────────────────────────────
+     DIMENSÕES — Tamanhos de componentes
+     ────────────────────────────────────────────────────────── */
+
+  --sidebar-largura:        260px;
+  --sidebar-largura-mini:   72px;
+  --header-altura:          64px;
+  --ticker-altura:          40px;
+
+  /* Inputs e botões */
+  --input-altura-sm:        32px;
+  --input-altura-md:        40px;
+  --input-altura-lg:        48px;
+  --btn-altura-sm:          32px;
+  --btn-altura-md:          40px;
+  --btn-altura-lg:          48px;
+
+
+  /* ──────────────────────────────────────────────────────────
+     BLUR / GLASS — Intensidade do glassmorphism
+     ────────────────────────────────────────────────────────── */
+
+  --blur-sm:                8px;
+  --blur-md:                12px;
+  --blur-lg:                20px;
+  --blur-xl:                40px;
+}

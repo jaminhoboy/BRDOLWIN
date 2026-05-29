@@ -1,0 +1,175 @@
+<!-- macro.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Macro | BRDOLWIN Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/macro.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-card">
+            <div class="sidebar-logo"><i data-lucide="activity"></i> BRDOLWIN</div>
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-link"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                <a href="operational.html" class="nav-link"><i data-lucide="target"></i> Operacional</a>
+                <a href="macro.html" class="nav-link active"><i data-lucide="globe"></i> Radar Macro</a>
+                <a href="heatmap.html" class="nav-link"><i data-lucide="flame"></i> Heatmap Inst.</a>
+                <a href="forex.html" class="nav-link"><i data-lucide="currency"></i> Forex</a>
+                <a href="admin.html" class="nav-link" id="adminSidebarLink" style="display: none; color: #F87171;"><i data-lucide="lock"></i> Bastidores (Admin)</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="flex-between mb-2"><span class="text-muted text-sm">Plano</span><span id="userPlanBadge" class="badge">PRO</span></div>
+                <button onclick="window.BRDOLWINAuth.logout()" class="btn-secondary w-100 text-sm flex-center gap-2"><i data-lucide="log-out" style="width: 14px;"></i> Desconectar</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h1 class="text-xl font-bold">Radar Macroeconômico</h1>
+                <div class="financial-data text-sm text-muted" id="clockDisplay">00:00:00</div>
+            </header>
+
+            <div class="content-scroll">
+                <div class="glass-card mb-4 flex-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-white mb-1">Ambiente Global Atual</h2>
+                        <p class="text-sm text-muted">Agente Macro: Risco fiscal local contido, mas pressão de treasuries globais.</p>
+                    </div>
+                    <div class="badge badge-status-closed text-lg px-4 py-2">RISK-OFF Moderado</div>
+                </div>
+
+                <div class="macro-grid">
+                    <div class="glass-card macro-indicator">
+                        <div class="macro-header"><span class="macro-title">DXY (Índice Dólar)</span><i id="macroDXYIcon" data-lucide="minus" class="text-muted w-4 h-4"></i></div>
+                        <div class="macro-value-row"><span class="macro-value" id="macroDXY">---</span><span class="text-sm" id="macroDXYChange">---</span></div>
+                    </div>
+                    <div class="glass-card macro-indicator">
+                        <div class="macro-header"><span class="macro-title">S&P 500 Futuro</span><i id="macroSP500Icon" data-lucide="minus" class="text-muted w-4 h-4"></i></div>
+                        <div class="macro-value-row"><span class="macro-value" id="macroSP500">---</span><span class="text-sm" id="macroSP500Change">---</span></div>
+                    </div>
+                    <div class="glass-card macro-indicator">
+                        <div class="macro-header"><span class="macro-title">Treasury 10Y</span><i id="macroTreasuryIcon" data-lucide="minus" class="text-muted w-4 h-4"></i></div>
+                        <div class="macro-value-row"><span class="macro-value" id="macroTreasury">---</span><span class="text-sm" id="macroTreasuryChange">---</span></div>
+                    </div>
+                    <div class="glass-card macro-indicator">
+                        <div class="macro-header"><span class="macro-title">VIX (Medo)</span><i id="macroVIXIcon" data-lucide="minus" class="text-muted w-4 h-4"></i></div>
+                        <div class="macro-value-row"><span class="macro-value" id="macroVIX">---</span><span class="text-sm" id="macroVIXChange">---</span></div>
+                    </div>
+                    <div class="glass-card macro-indicator">
+                        <div class="macro-header"><span class="macro-title">Petróleo WTI</span><i id="macroOilIcon" data-lucide="minus" class="text-muted w-4 h-4"></i></div>
+                        <div class="macro-value-row"><span class="macro-value" id="macroOil">---</span><span class="text-sm" id="macroOilChange">---</span></div>
+                    </div>
+                    <div class="glass-card macro-indicator">
+                        <div class="macro-header"><span class="macro-title">Juros Brasil (DI1F25)</span><i data-lucide="bar-chart" class="text-purple w-4 h-4"></i></div>
+                        <div class="macro-value-row"><span class="macro-value">---</span><span class="text-sm text-muted">---</span></div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 class="mb-3">Calendário Econômico</h3>
+                        <table class="calendar-table">
+                            <thead><tr><th>Horário</th><th>Impacto</th><th>Evento</th><th>Anterior</th></tr></thead>
+                            <tbody>
+                                <tr><td>09:30</td><td><span class="impact-badge impact-high"></span></td><td>EUA: Pedidos de Seguro Desemprego</td><td>215K</td></tr>
+                                <tr><td>11:00</td><td><span class="impact-badge impact-medium"></span></td><td>EUA: Vendas de Moradias</td><td>4.10M</td></tr>
+                                <tr><td>14:00</td><td><span class="impact-badge impact-low"></span></td><td>BR: Fluxo Cambial Estrangeiro</td><td>-</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="glass-card">
+                        <h3 class="mb-3">Mapa de Correlação</h3>
+                        <div id="macroRadar" class="radar-container"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase-client.js"></script>
+<script src="js/core/auth.js"></script>
+    <script src="js/core/router.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/data/api-service.js"></script>
+    <script src="js/data/market-state.js"></script>
+    <script>
+        lucide.createIcons();
+        window.BRDOLWINRouter.checkAuth();
+        
+        // Simples radar mock para o HTML estático funcionar e mostrar interface
+        var chartDom = document.getElementById('macroRadar');
+        var myChart = echarts.init(chartDom, 'dark');
+        var option = {
+            backgroundColor: 'transparent',
+            radar: {
+                indicator: [ { name: 'Apetite a Risco', max: 100}, { name: 'Liquidez Global', max: 100}, { name: 'Pressão Inflacionária', max: 100}, { name: 'Força do Dólar', max: 100}, { name: 'Volatilidade', max: 100} ],
+                splitArea: { areaStyle: { color: ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.05)'] } },
+                axisLine: { lineStyle: { color: 'rgba(255,255,255,0.2)' } },
+                splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }
+            },
+            series: [{ type: 'radar', data: [ { value: [40, 60, 80, 75, 50], name: 'Cenário', areaStyle: { color: 'rgba(59, 130, 246, 0.3)' }, lineStyle: { color: '#3B82F6' }, itemStyle: { color: '#3B82F6' } } ] }]
+        };
+        myChart.setOption(option);
+
+        // Atualizar indicadores macro com dados reais
+        if (window.BRDOLWINState) {
+            window.BRDOLWINState.subscribe((s) => {
+                const fmt = window.BRDOLWINApi;
+                if (!fmt) return;
+
+                const indicators = [
+                    { key: 'dxy', stateKey: 'dxy', elPrice: 'macroDXY', elChange: 'macroDXYChange', elIcon: 'macroDXYIcon' },
+                    { key: 'sp500', stateKey: 'sp500', elPrice: 'macroSP500', elChange: 'macroSP500Change', elIcon: 'macroSP500Icon' },
+                    { key: 'treasury', stateKey: 'treasury10y', elPrice: 'macroTreasury', elChange: 'macroTreasuryChange', elIcon: 'macroTreasuryIcon' },
+                    { key: 'vix', stateKey: 'vix', elPrice: 'macroVIX', elChange: 'macroVIXChange', elIcon: 'macroVIXIcon' },
+                    { key: 'oil', stateKey: 'oil', elPrice: 'macroOil', elChange: 'macroOilChange', elIcon: 'macroOilIcon' },
+                ];
+
+                indicators.forEach(ind => {
+                    const data = s[ind.stateKey];
+                    const formatted = fmt.formatQuoteForUI(data);
+                    const priceEl = document.getElementById(ind.elPrice);
+                    const changeEl = document.getElementById(ind.elChange);
+                    const iconEl = document.getElementById(ind.elIcon);
+
+                    if (priceEl) priceEl.textContent = formatted.price;
+                    if (changeEl) {
+                        changeEl.textContent = formatted.change;
+                        changeEl.className = 'text-sm ' + formatted.changeClass;
+                    }
+                    if (iconEl) {
+                        iconEl.setAttribute('data-lucide', formatted.trendIcon);
+                        iconEl.className = formatted.changeClass + ' w-4 h-4';
+                    }
+                });
+
+                // Atualizar regime badge
+                if (s.regime) {
+                    const regimeBadge = document.querySelector('.badge-status-closed, .badge-status-open');
+                    if (regimeBadge) regimeBadge.textContent = s.regime;
+                }
+
+                // Refresh lucide icons
+                try { lucide.createIcons(); } catch(e) {}
+            });
+        }
+
+        // Relógio local
+        setInterval(() => {
+            document.getElementById('clockDisplay').textContent = new Date().toLocaleTimeString('pt-BR');
+        }, 1000);
+    </script>
+</body>
+</html>

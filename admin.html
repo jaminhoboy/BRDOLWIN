@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo | BRDOLWIN Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-card">
+            <div class="sidebar-logo">
+                <i data-lucide="activity"></i> BRDOLWIN
+            </div>
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-link"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                <a href="operational.html" class="nav-link"><i data-lucide="target"></i> Operacional</a>
+                <a href="macro.html" class="nav-link"><i data-lucide="globe"></i> Radar Macro</a>
+                <a href="heatmap.html" class="nav-link"><i data-lucide="flame"></i> Heatmap Inst.</a>
+                <a href="forex.html" class="nav-link"><i data-lucide="currency"></i> Forex</a>
+                <a href="admin.html" class="nav-link active" id="adminSidebarLink" style="display: none; color: #F87171;"><i data-lucide="lock"></i> Bastidores (Admin)</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="flex-between mb-2">
+                    <span class="text-muted text-sm">Plano Atual</span>
+                    <span id="userPlanBadge" class="badge">ADMIN</span>
+                </div>
+                <button onclick="window.BRDOLWINAuth.logout()" class="btn-secondary w-100 text-sm flex-center gap-2">
+                    <i data-lucide="log-out" style="width: 14px;"></i> Desconectar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header admin-header">
+                <h1 class="text-xl font-bold" style="color: #EF4444;">Painel Administrativo — Bastidores</h1>
+                <div class="financial-data text-sm text-muted" id="clockDisplay">00:00:00</div>
+            </header>
+
+            <div class="content-scroll">
+                <!-- Top Metrics -->
+                <div class="admin-metrics-grid">
+                    <div class="admin-metric-card">
+                        <div class="admin-metric-title">Total Usuários <i data-lucide="users"></i></div>
+                        <div class="admin-metric-value">0</div>
+                        <div class="text-sm text-muted">Aguardando dados...</div>
+                    </div>
+                    <div class="admin-metric-card">
+                        <div class="admin-metric-title">Usuários Ativos <i data-lucide="user-check"></i></div>
+                        <div class="admin-metric-value">0</div>
+                        <div class="text-sm text-muted">Aguardando dados...</div>
+                    </div>
+                    <div class="admin-metric-card">
+                        <div class="admin-metric-title">Receita Mensal <i data-lucide="dollar-sign"></i></div>
+                        <div class="admin-metric-value">R$ 0,00</div>
+                        <div class="text-sm text-muted">Aguardando dados...</div>
+                    </div>
+                    <div class="admin-metric-card">
+                        <div class="admin-metric-title">Uptime do Sistema <i data-lucide="server"></i></div>
+                        <div class="admin-metric-value">0%</div>
+                        <div class="text-sm text-muted">Aguardando dados...</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Engine Status -->
+                    <div class="admin-section">
+                        <div class="admin-section-header">
+                            <h2 class="admin-section-title"><i data-lucide="cpu"></i> Status dos Motores (IA)</h2>
+                        </div>
+                        <div class="engine-status-grid">
+                            <!-- Populated by JS -->
+                            <div class="engine-card">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="globe"></i></div>
+                                    <span class="font-medium text-sm">Agente Macro</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="activity"></i></div>
+                                    <span class="font-medium text-sm">Agente Fluxo</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="layers"></i></div>
+                                    <span class="font-medium text-sm">Agente Estrutural</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="bar-chart-2"></i></div>
+                                    <span class="font-medium text-sm">Agente Quant</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="git-merge"></i></div>
+                                    <span class="font-medium text-sm">Agente Correlação</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="message-square"></i></div>
+                                    <span class="font-medium text-sm">Agente Sentimento</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="zap"></i></div>
+                                    <span class="font-medium text-sm">Agente Volatilidade</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configurações do Terminal -->
+                    <div class="admin-section">
+                        <div class="admin-section-header">
+                            <h2 class="admin-section-title"><i data-lucide="settings"></i> Configurações do Terminal</h2>
+                        </div>
+                        <div class="config-panel">
+                            <div class="config-group">
+                                <label for="sysName">Nome do Terminal</label>
+                                <input type="text" id="sysName" value="BRDOLWIN" disabled>
+                            </div>
+                            <div class="config-group">
+                                <label for="updateInt">Intervalo Base de Atualização (segundos)</label>
+                                <input type="number" id="updateInt" value="5" disabled>
+                            </div>
+                            <div class="config-group">
+                                <label for="dataSource">Fonte de Dados (Macro)</label>
+                                <select id="dataSource" disabled>
+                                    <option>Yahoo Finance + FRED</option>
+                                    <option>Bloomberg Terminal API</option>
+                                </select>
+                            </div>
+                            <div class="config-group">
+                                <label for="dataFeed">Feed B3 (WIN/WDO)</label>
+                                <select id="dataFeed" disabled>
+                                    <option>MetaTrader 5 (Local)</option>
+                                    <option>Cedro API</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="text-sm text-muted mt-4"><i data-lucide="info" style="width: 14px; display: inline-block;"></i> As configurações estarão disponíveis após a implementação do backend.</p>
+                    </div>
+                </div>
+
+                <!-- Tabela de Planos -->
+                <div class="admin-section">
+                    <div class="admin-section-header">
+                        <h2 class="admin-section-title"><i data-lucide="list"></i> Gerenciamento de Planos</h2>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="users-table" id="plansTable">
+                            <thead>
+                                <tr>
+                                    <th>Plano</th>
+                                    <th>Ícone</th>
+                                    <th>Atualização (s)</th>
+                                    <th>Horizontes</th>
+                                    <th>Permissões</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Log de Atividades -->
+                <div class="admin-section">
+                    <div class="admin-section-header">
+                        <h2 class="admin-section-title"><i data-lucide="terminal"></i> Log de Atividades (Sistema)</h2>
+                    </div>
+                    <div class="activity-log" id="activityLog">
+                        Aguardando conexão com backend...
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase-client.js"></script>
+<script src="js/core/auth.js"></script>
+    <script src="js/core/router.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/pages/admin-page.js"></script>
+    <script>
+        lucide.createIcons();
+        window.BRDOLWINRouter.checkAuth();
+        
+        setInterval(() => {
+            document.getElementById('clockDisplay').textContent = new Date().toLocaleTimeString('pt-BR');
+        }, 1000);
+    </script>
+</body>
+</html>

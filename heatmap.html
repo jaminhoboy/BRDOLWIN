@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heatmap Institucional | BRDOLWIN Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/macro.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-card">
+            <div class="sidebar-logo"><i data-lucide="activity"></i> BRDOLWIN</div>
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-link"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                <a href="operational.html" class="nav-link"><i data-lucide="target"></i> Operacional</a>
+                <a href="macro.html" class="nav-link"><i data-lucide="globe"></i> Radar Macro</a>
+                <a href="heatmap.html" class="nav-link active"><i data-lucide="flame"></i> Heatmap Inst.</a>
+                <a href="forex.html" class="nav-link"><i data-lucide="currency"></i> Forex</a>
+                <a href="admin.html" class="nav-link" id="adminSidebarLink" style="display: none; color: #F87171;"><i data-lucide="lock"></i> Bastidores (Admin)</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="flex-between mb-2"><span class="text-muted text-sm">Plano</span><span id="userPlanBadge" class="badge">ELITE</span></div>
+                <button onclick="window.BRDOLWINAuth.logout()" class="btn-secondary w-100 text-sm flex-center gap-2"><i data-lucide="log-out" style="width: 14px;"></i> Desconectar</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h1 class="text-xl font-bold">Heatmap de Liquidez & Fluxo</h1>
+                <div class="flex-center gap-4">
+                    <span class="badge badge-elite">Exclusivo Elite</span>
+                    <div class="financial-data text-sm text-muted" id="clockDisplay">00:00:00</div>
+                </div>
+            </header>
+
+            <div class="content-scroll">
+                <div class="heatmap-layout">
+                    <!-- Esquerda: Heatmap D3 (Mock UI para representação visual) -->
+                    <div class="main-heatmap-container p-4 flex-center flex-column">
+                        <div style="text-align: center; color: #94A3B8;">
+                            <i data-lucide="bar-chart-2" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 1rem;"></i>
+                            <h2 class="text-xl text-white mb-2">Visualização de Liquidez</h2>
+                            <p>O Heatmap interativo (D3.js) processa o book de ofertas em tempo real.</p>
+                            <div class="mt-4 flex-center gap-4">
+                                <div class="flex-center gap-2"><div style="width: 20px; height: 20px; background: #F87171; border-radius: 4px;"></div> Alta Liquidez Venda</div>
+                                <div class="flex-center gap-2"><div style="width: 20px; height: 20px; background: #0A0F1E; border: 1px solid #3B82F6; border-radius: 4px;"></div> Preço Atual</div>
+                                <div class="flex-center gap-2"><div style="width: 20px; height: 20px; background: #34D399; border-radius: 4px;"></div> Alta Liquidez Compra</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Direita: Eventos e Defesas -->
+                    <div class="side-panel">
+                        <div class="glass-card">
+                            <h3 class="mb-3 flex-center justify-start gap-2"><i data-lucide="shield"></i> Zonas de Defesa (WDO)</h3>
+                            <div class="defense-zone defense-sell"><span>Defesa Passiva Venda</span><span id="defenseSell">5.750,00</span></div>
+                            <div class="defense-zone defense-buy"><span>Absorção Compradora</span><span id="defenseBuy1">5.720,00</span></div>
+                            <div class="defense-zone defense-buy"><span>Lote Escondido (Iceberg)</span><span id="defenseBuy2">5.715,00</span></div>
+                        </div>
+
+                        <div class="glass-card flex-1">
+                            <h3 class="mb-3 flex-center justify-start gap-2"><i data-lucide="activity"></i> Timeline de Fluxo</h3>
+                            <div class="flow-timeline">
+                                <div class="flow-event buy">
+                                    <div class="event-time">10:15:32</div>
+                                    <div class="event-details"><strong class="text-green">Agressão UBS</strong><br>Tomou 500 lotes a mercado (WDO)</div>
+                                </div>
+                                <div class="flow-event sell">
+                                    <div class="event-time">10:12:05</div>
+                                    <div class="event-details"><strong class="text-red">Spoofing Detectado</strong><br>Cancelamento massivo no 135.500 (WIN)</div>
+                                </div>
+                                <div class="flow-event buy">
+                                    <div class="event-time">10:05:10</div>
+                                    <div class="event-details"><strong class="text-green">Renovação de Fila</strong><br>Itaú passivo no 134.800</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert-item">
+                            <i data-lucide="alert-triangle"></i> Atenção: Robôs HFT ativos no WDO (alta frequência de cancelamentos).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/core/supabase-client.js"></script>
+<script src="js/core/auth.js"></script>
+    <script src="js/core/router.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/data/api-service.js"></script>
+    <script src="js/data/market-state.js"></script>
+    <script>
+        lucide.createIcons();
+        window.BRDOLWINRouter.checkAuth();
+        if(!window.BRDOLWINAuth.hasPermission('heatmap') && !window.BRDOLWINAuth.isAdmin()) {
+            alert("O Heatmap Institucional é exclusivo do Plano Elite.");
+            window.location.href = 'dashboard.html';
+        }
+        
+        // Relógio local
+        setInterval(() => {
+            document.getElementById('clockDisplay').textContent = new Date().toLocaleTimeString('pt-BR');
+        }, 1000);
+
+        // Subscrever ao estado para atualizar zonas de defesa dinâmicas
+        if (window.BRDOLWINState) {
+            window.BRDOLWINState.subscribe((s) => {
+                const fmt = window.BRDOLWINUtils;
+                if (!fmt || !s.dolarPrice) return;
+                
+                const dSell = document.getElementById('defenseSell');
+                const dBuy1 = document.getElementById('defenseBuy1');
+                const dBuy2 = document.getElementById('defenseBuy2');
+                
+                if (dSell) dSell.textContent = fmt.formatPrice(s.dolarPrice + 0.015, 2);
+                if (dBuy1) dBuy1.textContent = fmt.formatPrice(s.dolarPrice - 0.010, 2);
+                if (dBuy2) dBuy2.textContent = fmt.formatPrice(s.dolarPrice - 0.020, 2);
+            });
+        }
+    </script>
+</body>
+</html>
