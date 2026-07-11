@@ -248,15 +248,56 @@
     if (dia === 0 || dia === 6) return 'fechado';
 
     if (horaDecimal < 8.75) return 'fechado';          // Antes das 08:45
-    if (horaDecimal < 9.0) return 'pre-abertura';       // 08:45 - 09:00
-    if (horaDecimal < 10.5) return 'abertura';          // 09:00 - 10:30
-    if (horaDecimal < 11.5) return 'manhã';             // 10:30 - 11:30
-    if (horaDecimal < 13.5) return 'almoço';            // 11:30 - 13:30
-    if (horaDecimal < 16.0) return 'tarde';             // 13:30 - 16:00
-    if (horaDecimal < 17.92) return 'fechamento';       // 16:00 - 17:55
-    if (horaDecimal < 18.5) return 'after';             // 17:55 - 18:30
+    if (horaDecimal < 9.00) return 'pre-abertura';     // 08:45 às 09:00
+    if (horaDecimal < 10.00) return 'abertura';        // 09:00 às 10:00
+    if (horaDecimal < 12.00) return 'manha';           // 10:00 às 12:00
+    if (horaDecimal < 13.50) return 'almoco';          // 12:00 às 13:30
+    if (horaDecimal < 17.00) return 'tarde';           // 13:30 às 17:00
+    if (horaDecimal < 17.50) return 'fechamento';      // 17:00 às 17:30
+    if (horaDecimal < 18.00) return 'after';           // 17:30 às 18:00
+    
+    return 'fechado';                                  // Após 18:00
+  }
 
-    return 'fechado';
+  function updateMarketStatusUI() {
+    const statusTextEl = document.getElementById('marketStatusText');
+    const statusDotEl = document.getElementById('marketStatusDot');
+    if (!statusTextEl || !statusDotEl) return;
+
+    // Checar se estamos no forex
+    const isForex = window.location.pathname.includes('forex');
+    const brt = getBrasiliaTime();
+    const dia = brt.getDay();
+    
+    let isClosed = false;
+    let label = 'Mercado Aberto';
+    
+    if (isForex) {
+        // Forex fechado: Sábado inteiro, e Sexta após 18h até Domingo 18h (BRT aprox)
+        if (dia === 6) isClosed = true; // Sábado
+        else if (dia === 5 && brt.getHours() >= 18) isClosed = true; // Sexta a noite
+        else if (dia === 0 && brt.getHours() < 18) isClosed = true; // Domingo de dia
+    } else {
+        // B3
+        const periodo = getTimeOfDay();
+        if (periodo === 'fechado') isClosed = true;
+        else if (periodo === 'pre-abertura' || periodo === 'after') {
+            isClosed = false;
+            label = 'Pré/After Market';
+        }
+    }
+
+    if (isClosed) {
+        statusTextEl.textContent = 'Mercado Fechado';
+        statusTextEl.className = 'text-sm font-medium text-red';
+        statusDotEl.style.background = '#F87171'; // Vermelho
+        statusDotEl.style.boxShadow = '0 0 8px #F87171';
+    } else {
+        statusTextEl.textContent = label;
+        statusTextEl.className = 'text-sm font-medium text-green';
+        statusDotEl.style.background = '#34D399'; // Verde
+        statusDotEl.style.boxShadow = '0 0 8px #34D399';
+    }
   }
 
   /**
@@ -350,6 +391,7 @@
     // Mercado / Tempo
     getBrasiliaTime,
     getTimeOfDay,
+    updateMarketStatusUI,
     getTimeOfDayLabel,
     isMarketOpen,
 

@@ -53,8 +53,8 @@
                 </div>
                 <div class="flex-center gap-4">
                     <div class="flex-center gap-2">
-                        <span class="pulse-dot"></span>
-                        <span class="text-sm text-green font-medium">Mercado Aberto</span>
+                        <span class="pulse-dot" id="marketStatusDot"></span>
+                        <span class="text-sm font-medium text-green" id="marketStatusText">Mercado Aberto</span>
                     </div>
                     <div class="financial-data text-sm text-muted" id="clockDisplay">00:00:00</div>
                     <div class="divider-v"></div>
@@ -261,7 +261,15 @@
             });
         });
 
-        setInterval(() => { document.getElementById('clockDisplay').textContent = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+        // Simulação do relógio e status do mercado
+        setInterval(() => {
+            const clockEl = document.getElementById('clockDisplay');
+            if(clockEl) clockEl.textContent = new Date().toLocaleTimeString('pt-BR');
+            
+            if(window.BRDOLWINUtils && window.BRDOLWINUtils.updateMarketStatusUI) {
+                window.BRDOLWINUtils.updateMarketStatusUI();
+            }
+        }, 1000);
     </script>
 </body>
 </html>
