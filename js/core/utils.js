@@ -264,6 +264,51 @@
     const statusDotEl = document.getElementById('marketStatusDot');
     if (!statusTextEl || !statusDotEl) return;
 
+    // Função para calcular tempo restante
+    function getCountdownText(isForex, now) {
+        const target = new Date(now);
+        const day = now.getDay();
+        const h = now.getHours();
+        
+        if (isForex) {
+            // Forex abre Domingo 18:00
+            if (day === 5 && h >= 18) { // Sexta
+                target.setDate(now.getDate() + 2);
+                target.setHours(18, 0, 0, 0);
+            } else if (day === 6) { // Sabado
+                target.setDate(now.getDate() + 1);
+                target.setHours(18, 0, 0, 0);
+            } else if (day === 0 && h < 18) { // Domingo
+                target.setHours(18, 0, 0, 0);
+            } else {
+                return ''; // Ta aberto
+            }
+        } else {
+            // B3 abre 09:00 Seg-Sex
+            if (day === 6) { // Sabado
+                target.setDate(now.getDate() + 2);
+                target.setHours(9, 0, 0, 0);
+            } else if (day === 0) { // Domingo
+                target.setDate(now.getDate() + 1);
+                target.setHours(9, 0, 0, 0);
+            } else if (h < 9) {
+                target.setHours(9, 0, 0, 0);
+            } else if (h >= 18) {
+                target.setDate(now.getDate() + (day === 5 ? 3 : 1));
+                target.setHours(9, 0, 0, 0);
+            } else {
+                return ''; // Ta aberto (ou after, onde tratamos diferente)
+            }
+        }
+
+        const diffMs = target - now;
+        if (diffMs <= 0) return '';
+        const hh = Math.floor(diffMs / 3600000);
+        const mm = String(Math.floor((diffMs % 3600000) / 60000)).padStart(2, '0');
+        const ss = String(Math.floor((diffMs % 60000) / 1000)).padStart(2, '0');
+        return `(abre em ${hh}h ${mm}m ${ss}s)`;
+    }
+
     // Checar se estamos no forex
     const isForex = window.location.pathname.includes('forex');
     const brt = getBrasiliaTime();
@@ -288,7 +333,8 @@
     }
 
     if (isClosed) {
-        statusTextEl.textContent = 'Mercado Fechado';
+        const countdown = getCountdownText(isForex, brt);
+        statusTextEl.textContent = countdown ? `Mercado Fechado ${countdown}` : 'Mercado Fechado';
         statusTextEl.className = 'text-sm font-medium text-red';
         statusDotEl.style.background = '#F87171'; // Vermelho
         statusDotEl.style.boxShadow = '0 0 8px #F87171';
