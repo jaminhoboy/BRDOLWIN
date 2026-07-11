@@ -277,11 +277,61 @@
                 </div>
                 </div>
 
+                <!-- CONTEÚDO: Atlas AI Forex -->
                 <div id="tab-fx-atlas" class="tab-content-panel">
-                    <div class="glass-card" style="padding: 3rem; text-align: center;">
-                        <i data-lucide="brain" style="width: 48px; height: 48px; color: var(--cor-accent-roxo); margin-bottom: 1rem;"></i>
-                        <h2 class="text-xl font-bold mb-2">Atlas AI Trader — Módulo Forex</h2>
-                        <p class="text-muted">A inteligência quantitativa institucional para moedas será ativada aqui.</p>
+                    <!-- Veredito Principal -->
+                    <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--cor-accent-roxo);">
+                        <div class="flex-between">
+                            <div>
+                                <h3 class="text-lg font-bold flex-center gap-2"><i data-lucide="brain" style="width: 20px; color: var(--cor-accent-roxo);"></i> Veredito do Atlas AI — <span id="fxAtlasTitle">Forex</span></h3>
+                                <p class="text-sm text-muted mt-1">Consenso ponderado de 8 estratégias quantitativas globais</p>
+                            </div>
+                            <div id="fxAtlasVerdictBadge" style="font-size: 1.2rem; font-weight: 700;">⚪ AGUARDANDO</div>
+                        </div>
+                        <div class="grid-3 mt-4">
+                            <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <span class="text-sm text-muted">Confiança</span>
+                                <div class="text-xl font-bold mt-1" id="fxAtlasConfidence" style="font-family: var(--fonte-dados);">0%</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <span class="text-sm text-muted">Score Compra</span>
+                                <div class="text-xl font-bold text-green mt-1" id="fxAtlasBuyScore" style="font-family: var(--fonte-dados);">0</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <span class="text-sm text-muted">Score Venda</span>
+                                <div class="text-xl font-bold text-red mt-1" id="fxAtlasSellScore" style="font-family: var(--fonte-dados);">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estratégias Individuais -->
+                    <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <h4 class="text-md font-bold mb-3">📊 Estratégias Ativas</h4>
+                        <div id="fxAtlasStrategiesGrid" class="grid-2" style="gap: 0.75rem;"></div>
+                    </div>
+
+                    <!-- Gestão de Risco e Diário -->
+                    <div class="grid-2" style="gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="glass-card" style="padding: 1.5rem;">
+                            <h4 class="text-md font-bold mb-3 flex-center gap-2"><i data-lucide="shield" style="width: 16px;"></i> Gestão de Risco Global</h4>
+                            <div class="flex-between text-sm mb-2"><span class="text-muted">Capital Atual</span> <span class="font-bold" id="fxAtlasCapital">R$ 50.000</span></div>
+                            <div class="flex-between text-sm mb-2"><span class="text-muted">P&L Diário</span> <span class="font-bold" id="fxAtlasPnl">R$ 0,00</span></div>
+                            <div class="flex-between text-sm"><span class="text-muted">Status</span> <span class="font-bold text-green" id="fxAtlasRiskStatus">✅ Operacional</span></div>
+                        </div>
+                        <div class="glass-card" style="padding: 1.5rem;">
+                            <h4 class="text-md font-bold mb-3 flex-center gap-2"><i data-lucide="bar-chart-3" style="width: 16px;"></i> Métricas Paper Trading</h4>
+                            <div class="flex-between text-sm mb-2"><span class="text-muted">Total Trades</span> <span class="font-bold" id="fxAtlasTotalTrades">0</span></div>
+                            <div class="flex-between text-sm mb-2"><span class="text-muted">Win Rate</span> <span class="font-bold" id="fxAtlasWinRate">0%</span></div>
+                            <div class="flex-between text-sm"><span class="text-muted">Profit Factor</span> <span class="font-bold" id="fxAtlasPF">0</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Diário de Operações -->
+                    <div class="glass-card" style="padding: 1.5rem;">
+                        <h4 class="text-md font-bold mb-3 flex-center gap-2"><i data-lucide="book-open" style="width: 16px;"></i> Últimas Operações</h4>
+                        <div id="fxAtlasJournalList" style="max-height: 250px; overflow-y: auto;">
+                            <p class="text-sm text-muted" style="text-align: center; padding: 2rem;">Nenhuma operação registrada ainda.</p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -82,7 +82,7 @@
             }
 
             // ── 2. Analisar cada ativo ──
-            const assets = ['win', 'wdo'];
+            const assets = ['win', 'wdo', 'eurusd', 'usdjpy', 'gbpusd'];
             const globalCtx = {
                 sp500: state.sp500,
                 dxy: state.dxy,
@@ -224,7 +224,14 @@
                 target = price - atr * 2.5;
             }
 
-            const assetName = asset === 'win' ? 'WINV26' : 'WDOV26';
+            const formatAssetName = (ast) => {
+                const map = {
+                    'win': 'WINV26', 'wdo': 'WDOV26',
+                    'eurusd': 'EUR/USD', 'usdjpy': 'USD/JPY', 'gbpusd': 'GBP/USD'
+                };
+                return map[ast] || ast.toUpperCase();
+            };
+            const assetName = formatAssetName(asset);
 
             Alerts.showEntryAlert({
                 asset: assetName,
