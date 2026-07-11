@@ -1,0 +1,170 @@
+/* css/atlas-core.css */
+
+/* ─── NAVEGAÇÃO DE ABAS HORIZONTAIS ─── */
+.asset-tabs {
+    display: flex;
+    gap: var(--espaco-2);
+    border-bottom: 1px solid var(--cor-surface-hover);
+    margin-bottom: var(--espaco-6);
+    padding-bottom: var(--espaco-2);
+    overflow-x: auto;
+}
+
+.asset-tab {
+    padding: var(--espaco-2) var(--espaco-4);
+    border-radius: var(--raio-md);
+    color: var(--cor-texto-secundario);
+    font-weight: 500;
+    font-size: var(--fonte-tamanho-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--espaco-2);
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.asset-tab:hover {
+    color: var(--cor-texto-primario);
+    background: var(--cor-surface-hover);
+}
+
+.asset-tab.active {
+    color: white;
+    background: var(--cor-surface-active);
+    border-color: var(--cor-accent-azul);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+}
+
+.tab-content-panel {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content-panel.active {
+    display: block;
+}
+
+/* ─── TOAST NOTIFICATIONS (POP-UPS GLOBAIS) ─── */
+#toast-container {
+    position: fixed;
+    top: var(--espaco-6);
+    right: var(--espaco-6);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-3);
+    pointer-events: none; /* Let clicks pass through empty space */
+}
+
+.toast-alert {
+    width: 380px;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--cor-surface-hover);
+    border-left: 4px solid var(--cor-accent-azul);
+    border-radius: var(--raio-lg);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    padding: var(--espaco-4);
+    pointer-events: auto; /* Catch clicks on the toast itself */
+    animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.toast-alert.closing {
+    animation: slideOutRight 0.3s forwards;
+}
+
+.toast-alert.buy { border-left-color: var(--cor-sucesso); }
+.toast-alert.sell { border-left-color: var(--cor-alerta-vermelho); }
+
+.toast-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--espaco-3);
+}
+
+.toast-title {
+    font-weight: 700;
+    font-size: var(--fonte-tamanho-base);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: var(--espaco-2);
+}
+
+.toast-close {
+    background: transparent;
+    border: none;
+    color: var(--cor-texto-secundario);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--raio-sm);
+}
+
+.toast-close:hover {
+    color: white;
+    background: var(--cor-surface-hover);
+}
+
+.toast-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--espaco-3);
+    background: var(--cor-bg-principal);
+    padding: var(--espaco-3);
+    border-radius: var(--raio-md);
+    margin-bottom: var(--espaco-3);
+}
+
+.toast-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.toast-label {
+    font-size: var(--fonte-tamanho-xs);
+    color: var(--cor-texto-secundario);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.toast-value {
+    font-family: var(--fonte-dados);
+    font-size: var(--fonte-tamanho-sm);
+    font-weight: 600;
+    color: var(--cor-texto-primario);
+}
+
+.toast-reason {
+    font-size: var(--fonte-tamanho-xs);
+    color: var(--cor-texto-secundario);
+    font-style: italic;
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--cor-accent-azul);
+    width: 100%;
+    transform-origin: left;
+}
+
+.toast-alert.buy .toast-progress { background: var(--cor-sucesso); }
+.toast-alert.sell .toast-progress { background: var(--cor-alerta-vermelho); }
+
+@keyframes slideInRight {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(120%); opacity: 0; }
+}

@@ -99,7 +99,7 @@
             const resultado = await window.BRDOLWINAuth.login(email, pass);
             
             if(resultado && resultado.sucesso) {
-                window.location.href = 'dashboard.html';
+                window.location.href = 'indice.html';
             } else {
                 document.getElementById('loginError').textContent = resultado ? resultado.mensagem : 'Erro ao conectar.';
                 document.getElementById('loginError').style.display = 'block';
@@ -108,10 +108,12 @@
             }
         });
 
-        // Redirect if already logged in
-        if(window.BRDOLWINAuth && window.BRDOLWINAuth.isAuthenticated()) {
-            window.location.href = 'dashboard.html';
-        }
+        // Listen for auth changes to redirect if already logged in
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' || session) {
+                window.location.href = 'indice.html';
+            }
+        });
     </script>
 </body>
 </html>

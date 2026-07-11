@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Índice | BRDOLWIN Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/atlas-core.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-card">
+            <div class="sidebar-logo">
+                <i data-lucide="activity"></i> BRDOLWIN
+            </div>
+            <nav class="nav-menu">
+                <a href="indice.html" class="nav-link active"><i data-lucide="trending-up"></i> Mini Índice</a>
+                <a href="dolar.html" class="nav-link"><i data-lucide="dollar-sign"></i> Mini Dólar</a>
+                <a href="forex.html" class="nav-link"><i data-lucide="globe"></i> Forex</a>
+                <a href="macro.html" class="nav-link"><i data-lucide="radar"></i> Radar Macro</a>
+                <a href="admin.html" class="nav-link" id="adminSidebarLink" style="display: none; color: #F87171;"><i data-lucide="lock"></i> Bastidores</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="flex-between mb-2">
+                    <span class="text-muted text-sm">Plano Atual</span>
+                    <span id="userPlanBadge" class="badge">PRO</span>
+                </div>
+                <button onclick="window.BRDOLWINAuth.logout()" class="btn-secondary w-100 text-sm flex-center gap-2">
+                    <i data-lucide="log-out" style="width: 14px;"></i> Desconectar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div>
+                    <h1 class="text-xl font-bold flex-center gap-2"><i data-lucide="trending-up" class="text-blue"></i> WIN (Mini Índice)</h1>
+                    <div class="text-sm mt-1">
+                        <span id="winPrice" class="font-bold text-light" style="font-family: var(--fonte-dados);">135.250</span>
+                        <span id="winChange" class="text-green ml-2" style="font-family: var(--fonte-dados);">+0,45%</span>
+                    </div>
+                </div>
+                <div class="flex-center gap-4">
+                    <div class="flex-center gap-2">
+                        <span class="pulse-dot"></span>
+                        <span class="text-sm text-green font-medium">Mercado Aberto</span>
+                    </div>
+                    <div class="financial-data text-sm text-muted" id="clockDisplay">00:00:00</div>
+                    <div class="divider-v"></div>
+                    <div class="text-sm font-medium" id="userNameDisplay">Usuário</div>
+                </div>
+            </header>
+
+            <div class="content-scroll">
+                
+                <!-- Abas de Navegação do Ativo -->
+                <div class="asset-tabs">
+                    <button class="asset-tab active" data-target="tab-overview">
+                        <i data-lucide="layout-dashboard" style="width: 16px;"></i> Visão Geral
+                    </button>
+                    <button class="asset-tab" data-target="tab-atlas" style="border-bottom: 2px solid var(--cor-accent-roxo);">
+                        <i data-lucide="brain" style="width: 16px;"></i> Atlas AI
+                    </button>
+                    <button class="asset-tab" data-target="tab-operational">
+                        <i data-lucide="target" style="width: 16px;"></i> Operacional
+                    </button>
+                    <button class="asset-tab" data-target="tab-heatmap">
+                        <i data-lucide="flame" style="width: 16px;"></i> Heatmap Inst.
+                    </button>
+                </div>
+
+                <!-- CONTEÚDO: Visão Geral (Antigo Dashboard WIN) -->
+                <div id="tab-overview" class="tab-content-panel active">
+                    <div class="dashboard-grid">
+                        <div class="top-metrics">
+                            <div class="glass-card metric-card">
+                                <span class="metric-label">Regime de Mercado (WIN)</span>
+                                <div class="mt-2"><span class="regime-badge" id="marketRegime"><i data-lucide="trending-up"></i> Tendência Alta</span></div>
+                            </div>
+                            <div class="glass-card metric-card">
+                                <span class="metric-label">Confiança Institucional</span>
+                                <div class="metric-value text-blue" id="confidenceScore">Alta (82%)</div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card probability-panel">
+                            <div class="chart-header" style="margin-bottom: 1rem;">
+                                <h3 style="font-size: 1rem;">Probabilidades WIN</h3>
+                                <div class="flex-center gap-2" id="probTabs">
+                                    <button class="btn-secondary text-xs px-2 py-1 active" onclick="window.BRDOLWINDashboard.selectHorizon('30m')">30m</button>
+                                    <button class="btn-secondary text-xs px-2 py-1" onclick="window.BRDOLWINDashboard.selectHorizon('1h')">1h</button>
+                                </div>
+                            </div>
+                            <div class="prob-section">
+                                <div id="winGauge" class="gauge-container" style="min-height: 180px;"></div>
+                                <div class="probability-bar-group mt-3">
+                                    <div class="probability-bar-label"><span>Alta</span> <span id="winProbHigh" class="text-green">--%</span></div>
+                                    <div class="progress-bar-container"><div id="winBarHigh" class="progress-bar" style="background:#34D399; width:0%"></div></div>
+                                </div>
+                                <div class="probability-bar-group mt-2">
+                                    <div class="probability-bar-label"><span>Baixa</span> <span id="winProbLow" class="text-red">--%</span></div>
+                                    <div class="progress-bar-container"><div id="winBarLow" class="progress-bar" style="background:#F87171; width:0%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTEÚDO: Atlas AI (Novo) -->
+                <div id="tab-atlas" class="tab-content-panel">
+                    <div class="glass-card" style="padding: 3rem; text-align: center;">
+                        <i data-lucide="brain" style="width: 48px; height: 48px; color: var(--cor-accent-roxo); margin-bottom: 1rem;"></i>
+                        <h2 class="text-xl font-bold mb-2">Atlas AI Trader — Módulo em Construção</h2>
+                        <p class="text-muted">A inteligência quantitativa institucional será ativada aqui.</p>
+                    </div>
+                </div>
+
+                <!-- CONTEÚDO: Operacional -->
+                <div id="tab-operational" class="tab-content-panel">
+                    <div id="execWinContent" class="glass-card">
+                        <div class="flex-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold">Plano de Execução — WIN</h3>
+                                <p class="text-sm text-muted">Inteligência Operacional Ativa</p>
+                            </div>
+                            <div class="badge" style="background: rgba(52, 211, 153, 0.1); color: #34D399; border: 1px solid rgba(52, 211, 153, 0.3);">
+                                Status: PRONTO PARA OPERAR
+                            </div>
+                        </div>
+                        
+                        <div class="grid-3" style="margin-bottom: 1.5rem;">
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Região de Entrada</span>
+                                <div class="text-xl font-bold text-light mt-1" id="execWinEntry">Aguardando dados...</div>
+                            </div>
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Stop Institucional</span>
+                                <div class="text-xl font-bold text-red mt-1" id="execWinStop">---</div>
+                            </div>
+                            <div class="metric-card" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                                <span class="text-sm text-muted">Alvo Principal</span>
+                                <div class="text-xl font-bold text-green mt-1" id="execWinTarget">---</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTEÚDO: Heatmap -->
+                <div id="tab-heatmap" class="tab-content-panel">
+                    <div class="glass-card" style="padding: 2rem;">
+                        <h3 class="text-lg font-bold mb-4 flex-center gap-2"><i data-lucide="flame" class="text-red"></i> Zonas de Defesa (WIN)</h3>
+                        <p class="text-muted text-sm">Requer permissão Elite para visualizar livro de profundidade.</p>
+                    </div>
+                </div>
+
+                <!-- Bottom Ticker -->
+                <div class="bottom-ticker mt-4">
+                    <div class="ticker-track" id="globalTicker">
+                        <div class="ticker-item"><span class="ticker-label">S&P500</span> <span id="tickerSP500" class="text-muted">Carregando...</span></div>
+                        <div class="ticker-item"><span class="ticker-label">DXY</span> <span id="tickerDXY" class="text-muted">Carregando...</span></div>
+                        <div class="ticker-item"><span class="ticker-label">VIX</span> <span id="tickerVIX" class="text-muted">Carregando...</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/core/supabase-client.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script src="js/core/router.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/data/api-service.js"></script>
+    <script src="js/data/market-state.js"></script>
+    <script src="js/engines/engines.js"></script>
+    <script src="js/core/alert-manager.js"></script>
+    <script src="js/pages/indice-page.js"></script>
+    
+    <!-- Tab Manager & Page Init -->
+    <script>
+        lucide.createIcons();
+        window.BRDOLWINRouter.checkAuth();
+
+        // Gerenciamento de abas
+        document.querySelectorAll('.asset-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.asset-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content-panel').forEach(p => p.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.target).classList.add('active');
+            });
+        });
+
+        setInterval(() => { document.getElementById('clockDisplay').textContent = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+    </script>
+</body>
+</html>

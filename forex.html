@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/atlas-core.css">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <style>
         .forex-pair-panel {
@@ -31,12 +32,11 @@
                 <i data-lucide="activity"></i> BRDOLWIN
             </div>
             <nav class="nav-menu">
-                <a href="dashboard.html" class="nav-link"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-                <a href="operational.html" class="nav-link"><i data-lucide="target"></i> Operacional</a>
-                <a href="macro.html" class="nav-link"><i data-lucide="globe"></i> Radar Macro</a>
-                <a href="heatmap.html" class="nav-link"><i data-lucide="flame"></i> Heatmap Inst.</a>
-                <a href="forex.html" class="nav-link active"><i data-lucide="currency"></i> Forex</a>
-                <a href="admin.html" class="nav-link" id="adminSidebarLink" style="display: none; color: #F87171;"><i data-lucide="lock"></i> Bastidores (Admin)</a>
+                <a href="indice.html" class="nav-link"><i data-lucide="trending-up"></i> Mini Índice</a>
+                <a href="dolar.html" class="nav-link"><i data-lucide="dollar-sign"></i> Mini Dólar</a>
+                <a href="forex.html" class="nav-link active"><i data-lucide="globe"></i> Forex</a>
+                <a href="macro.html" class="nav-link"><i data-lucide="radar"></i> Radar Macro</a>
+                <a href="admin.html" class="nav-link" id="adminSidebarLink" style="display: none; color: #F87171;"><i data-lucide="lock"></i> Bastidores</a>
             </nav>
             <div class="sidebar-footer">
                 <div class="flex-between mb-2">
@@ -74,6 +74,17 @@
                         <button class="btn-secondary text-xs px-3 py-1.5" onclick="window.switchForexPair('gbpusd')" id="tabBtnGBPUSD">GBP/USD</button>
                     </div>
                 </div>
+
+                <div class="asset-tabs">
+                    <button class="asset-tab active" data-target="tab-fx-overview">
+                        <i data-lucide="layout-dashboard" style="width: 16px;"></i> Visão Geral & Operacional
+                    </button>
+                    <button class="asset-tab" data-target="tab-fx-atlas" style="border-bottom: 2px solid var(--cor-accent-roxo);">
+                        <i data-lucide="brain" style="width: 16px;"></i> Atlas AI (Forex)
+                    </button>
+                </div>
+
+                <div id="tab-fx-overview" class="tab-content-panel active">
 
                 <!-- EUR/USD Panel -->
                 <div id="panelEURUSD" class="forex-pair-panel active">
@@ -263,6 +274,15 @@
                     <span class="metric-label">Confiança Institucional (Forex)</span>
                     <div class="metric-value text-blue mt-2" id="fxConfidence">Aguardando Análise...</div>
                 </div>
+                </div>
+
+                <div id="tab-fx-atlas" class="tab-content-panel">
+                    <div class="glass-card" style="padding: 3rem; text-align: center;">
+                        <i data-lucide="brain" style="width: 48px; height: 48px; color: var(--cor-accent-roxo); margin-bottom: 1rem;"></i>
+                        <h2 class="text-xl font-bold mb-2">Atlas AI Trader — Módulo Forex</h2>
+                        <p class="text-muted">A inteligência quantitativa institucional para moedas será ativada aqui.</p>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -275,10 +295,22 @@
     <script src="js/core/utils.js"></script>
     <script src="js/data/api-service.js"></script>
     <script src="js/data/market-state.js"></script>
+    <script src="js/core/alert-manager.js"></script>
     <script src="js/pages/forex-page.js"></script>
     <script>
         lucide.createIcons();
         window.BRDOLWINRouter.checkAuth();
+        
+        // Gerenciamento de abas
+        document.querySelectorAll('.asset-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.asset-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content-panel').forEach(p => p.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.target).classList.add('active');
+            });
+        });
         
         // Simulação do relógio
         setInterval(() => {
