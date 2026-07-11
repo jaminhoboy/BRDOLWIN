@@ -116,12 +116,56 @@
                     </div>
                 </div>
 
-                <!-- CONTEÚDO: Atlas AI (Novo) -->
+                <!-- CONTEÚDO: Atlas AI -->
                 <div id="tab-atlas" class="tab-content-panel">
-                    <div class="glass-card" style="padding: 3rem; text-align: center;">
-                        <i data-lucide="brain" style="width: 48px; height: 48px; color: var(--cor-accent-roxo); margin-bottom: 1rem;"></i>
-                        <h2 class="text-xl font-bold mb-2">Atlas AI Trader — Módulo em Construção</h2>
-                        <p class="text-muted">A inteligência quantitativa institucional será ativada aqui.</p>
+                    <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--cor-accent-roxo);">
+                        <div class="flex-between">
+                            <div>
+                                <h3 class="text-lg font-bold flex-center gap-2"><i data-lucide="brain" style="width: 20px; color: var(--cor-accent-roxo);"></i> Veredito do Atlas AI — WDO</h3>
+                                <p class="text-sm text-muted mt-1">Consenso ponderado de 8 estratégias quantitativas</p>
+                            </div>
+                            <div id="atlasVerdictBadge" style="font-size: 1.2rem; font-weight: 700;">⚪ AGUARDANDO</div>
+                        </div>
+                        <div class="grid-3 mt-4">
+                            <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <span class="text-sm text-muted">Confiança</span>
+                                <div class="text-xl font-bold mt-1" id="atlasConfidence" style="font-family: var(--fonte-dados);">0%</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <span class="text-sm text-muted">Score Compra</span>
+                                <div class="text-xl font-bold text-green mt-1" id="atlasBuyScore" style="font-family: var(--fonte-dados);">0</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <span class="text-sm text-muted">Score Venda</span>
+                                <div class="text-xl font-bold text-red mt-1" id="atlasSellScore" style="font-family: var(--fonte-dados);">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <h4 class="text-md font-bold mb-3">📊 Estratégias Ativas</h4>
+                        <div id="atlasStrategiesGrid" class="grid-2" style="gap: 0.75rem;"></div>
+                    </div>
+                    <div class="grid-2" style="gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="glass-card" style="padding: 1.5rem;">
+                            <h4 class="text-md font-bold mb-3 flex-center gap-2"><i data-lucide="shield" style="width: 16px;"></i> Gestão de Risco</h4>
+                            <div class="flex-between text-sm mb-2"><span class="text-muted">Capital Atual</span> <span class="font-bold" id="atlasCapital">R$ 50.000</span></div>
+                            <div class="flex-between text-sm mb-2"><span class="text-muted">P&L Diário</span> <span class="font-bold" id="atlasPnl">R$ 0,00</span></div>
+                            <div class="flex-between text-sm mb-2"><span class="text-muted">Drawdown</span> <span class="font-bold" id="atlasDrawdown">0,00%</span></div>
+                            <div class="flex-between text-sm"><span class="text-muted">Status</span> <span class="font-bold text-green" id="atlasRiskStatus">✅ Operacional</span></div>
+                        </div>
+                        <div class="glass-card" style="padding: 1.5rem;">
+                            <h4 class="text-md font-bold mb-3 flex-center gap-2"><i data-lucide="bar-chart-3" style="width: 16px;"></i> Métricas Paper Trading</h4>
+                            <div class="flex-between text-sm mb-2"><span class="text-muted">Total Trades</span> <span class="font-bold" id="atlasTotalTrades">0</span></div>
+                            <div class="flex-between text-sm mb-2"><span class="text-muted">Win Rate</span> <span class="font-bold" id="atlasWinRate">0%</span></div>
+                            <div class="flex-between text-sm mb-2"><span class="text-muted">Profit Factor</span> <span class="font-bold" id="atlasPF">0</span></div>
+                            <div class="flex-between text-sm"><span class="text-muted">Sharpe Ratio</span> <span class="font-bold" id="atlasSharpe">0</span></div>
+                        </div>
+                    </div>
+                    <div class="glass-card" style="padding: 1.5rem;">
+                        <h4 class="text-md font-bold mb-3 flex-center gap-2"><i data-lucide="book-open" style="width: 16px;"></i> Diário de Operações</h4>
+                        <div id="atlasJournalList" style="max-height: 250px; overflow-y: auto;">
+                            <p class="text-sm text-muted" style="text-align: center; padding: 2rem;">Nenhuma operação registrada ainda.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -186,6 +230,11 @@
     <script src="js/data/market-state.js"></script>
     <script src="js/engines/engines.js"></script>
     <script src="js/core/alert-manager.js"></script>
+    <script src="js/atlas/market-memory.js"></script>
+    <script src="js/atlas/strategies.js"></script>
+    <script src="js/atlas/risk-manager.js"></script>
+    <script src="js/atlas/trade-journal.js"></script>
+    <script src="js/atlas/orchestrator.js"></script>
     <script src="js/pages/dolar-page.js"></script>
     
     <!-- Tab Manager & Page Init -->
