@@ -122,7 +122,13 @@
                     <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--cor-accent-roxo);">
                         <div class="flex-between">
                             <div>
-                                <h3 class="text-lg font-bold flex-center gap-2"><i data-lucide="brain" style="width: 20px; color: var(--cor-accent-roxo);"></i> Veredito do Atlas AI — WDO</h3>
+                                <h3 class="text-lg font-bold flex-center gap-2">
+                                    <i data-lucide="brain" style="width: 20px; color: var(--cor-accent-roxo);"></i> 
+                                    Veredito do Atlas AI — WDO
+                                    <button class="btn-secondary" style="padding: 4px; border-radius: 50%;" onclick="window.BRDOLWINAtlasSettings.openModal()" title="Configurações do Atlas">
+                                        <i data-lucide="settings" style="width: 16px;"></i>
+                                    </button>
+                                </h3>
                                 <p class="text-sm text-muted mt-1">Consenso ponderado de 8 estratégias quantitativas</p>
                             </div>
                             <div id="atlasVerdictBadge" style="font-size: 1.2rem; font-weight: 700;">⚪ AGUARDANDO</div>
@@ -235,6 +241,7 @@
     <script src="js/atlas/strategies.js"></script>
     <script src="js/atlas/risk-manager.js"></script>
     <script src="js/atlas/trade-journal.js"></script>
+    <script src="js/atlas/atlas-settings.js"></script>
     <script src="js/atlas/orchestrator.js"></script>
     <script src="js/pages/dolar-page.js"></script>
     

@@ -21,12 +21,12 @@
         weights: {
             trend: 20,
             momentum: 15,
-            meanReversion: 10,
+            meanReversion: 15,
             volatility: 10,
-            correlation: 15,
+            correlation: 10,
             smartMoney: 15,
-            statistical: 5,
-            breakout: 10
+            statistical: 10,
+            breakout: 5
         },
 
         // Threshold para considerar sinal "claro"
@@ -51,12 +51,25 @@
                 return;
             }
 
+            // Carrega config inicial se existir
+            if (window.BRDOLWINAtlasSettings) {
+                const conf = window.BRDOLWINAtlasSettings.getSettings();
+                this.weights = { ...conf.weights };
+                this.ALERT_THRESHOLD = conf.threshold;
+            }
+
             // Subscreve ao estado do mercado
             window.BRDOLWINState.subscribe((state) => {
                 this.processState(state);
             });
 
             console.log('[Atlas Orchestrator] ✅ Inicializado e escutando MarketState');
+        },
+
+        updateConfig(config) {
+            this.weights = { ...config.weights };
+            this.ALERT_THRESHOLD = config.threshold;
+            console.log('[Atlas Orchestrator] Configurações atualizadas dinamicamente.');
         },
 
         /**
