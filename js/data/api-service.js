@@ -146,53 +146,38 @@
   /**
    * Busca EUR/USD
    */
-  async function getEURUSD() {
-    return await fetchYahooQuote('EURUSD=X');
-  }
-
-  /**
-   * Busca USD/JPY
-   */
-  async function getUSDJPY() {
-    return await fetchYahooQuote('USDJPY=X');
-  }
-
-  /**
-   * Busca GBP/USD
-   */
-  async function getGBPUSD() {
-    return await fetchYahooQuote('GBPUSD=X');
-  }
+  async function getEURUSD() { return await fetchYahooQuote('EURUSD=X'); }
+  async function getUSDJPY() { return await fetchYahooQuote('USDJPY=X'); }
+  async function getGBPUSD() { return await fetchYahooQuote('GBPUSD=X'); }
+  async function getAUDUSD() { return await fetchYahooQuote('AUDUSD=X'); }
+  async function getUSDCAD() { return await fetchYahooQuote('USDCAD=X'); }
+  async function getUSDCHF() { return await fetchYahooQuote('USDCHF=X'); }
+  async function getNZDUSD() { return await fetchYahooQuote('NZDUSD=X'); }
+  async function getEURJPY() { return await fetchYahooQuote('EURJPY=X'); }
+  async function getGBPJPY() { return await fetchYahooQuote('GBPJPY=X'); }
+  async function getEURGBP() { return await fetchYahooQuote('EURGBP=X'); }
 
   /**
    * Busca todos os dados macro de uma vez
    * Retorna um objeto com todos os ativos, null para os que falharem
    */
   async function getAllMacro() {
-    const [dxy, sp500, vix, oil, treasury, dolar, ibov, eurusd, usdjpy, gbpusd] = await Promise.allSettled([
-      getDXY(),
-      getSP500(),
-      getVIX(),
-      getOilWTI(),
-      getTreasury10Y(),
-      getDolar(),
-      getIbovespa(),
-      getEURUSD(),
-      getUSDJPY(),
-      getGBPUSD(),
+    const results = await Promise.allSettled([
+      getDXY(), getSP500(), getVIX(), getOilWTI(), getTreasury10Y(),
+      getDolar(), getIbovespa(),
+      getEURUSD(), getUSDJPY(), getGBPUSD(),
+      getAUDUSD(), getUSDCAD(), getUSDCHF(), getNZDUSD(),
+      getEURJPY(), getGBPJPY(), getEURGBP(),
     ]);
-
+    const val = (r) => r.status === 'fulfilled' ? r.value : null;
     return {
-      dxy: dxy.status === 'fulfilled' ? dxy.value : null,
-      sp500: sp500.status === 'fulfilled' ? sp500.value : null,
-      vix: vix.status === 'fulfilled' ? vix.value : null,
-      oil: oil.status === 'fulfilled' ? oil.value : null,
-      treasury: treasury.status === 'fulfilled' ? treasury.value : null,
-      dolar: dolar.status === 'fulfilled' ? dolar.value : null,
-      ibov: ibov.status === 'fulfilled' ? ibov.value : null,
-      eurusd: eurusd.status === 'fulfilled' ? eurusd.value : null,
-      usdjpy: usdjpy.status === 'fulfilled' ? usdjpy.value : null,
-      gbpusd: gbpusd.status === 'fulfilled' ? gbpusd.value : null,
+      dxy: val(results[0]), sp500: val(results[1]), vix: val(results[2]),
+      oil: val(results[3]), treasury: val(results[4]),
+      dolar: val(results[5]), ibov: val(results[6]),
+      eurusd: val(results[7]), usdjpy: val(results[8]), gbpusd: val(results[9]),
+      audusd: val(results[10]), usdcad: val(results[11]), usdchf: val(results[12]),
+      nzdusd: val(results[13]), eurjpy: val(results[14]), gbpjpy: val(results[15]),
+      eurgbp: val(results[16]),
     };
   }
 
@@ -245,24 +230,10 @@
   // ─── Exportação Global ────────────────────────────────
 
   window.BRDOLWINApi = {
-    // Cotações individuais
-    getDolar,
-    getIbovespa,
-    getDXY,
-    getSP500,
-    getVIX,
-    getOilWTI,
-    getTreasury10Y,
-    getEURUSD,
-    getUSDJPY,
-    getGBPUSD,
-
-    // Pacote completo
-    getAllMacro,
-
-    // Helpers
-    formatQuoteForUI,
-    clearCache,
+    getDolar, getIbovespa, getDXY, getSP500, getVIX, getOilWTI, getTreasury10Y,
+    getEURUSD, getUSDJPY, getGBPUSD,
+    getAUDUSD, getUSDCAD, getUSDCHF, getNZDUSD, getEURJPY, getGBPJPY, getEURGBP,
+    getAllMacro, formatQuoteForUI, clearCache,
   };
 
   console.log('[BRDOLWIN] ✅ API Service carregado (Dados Reais)');
