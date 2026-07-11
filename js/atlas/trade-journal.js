@@ -3,14 +3,13 @@
  * ATLAS AI — Trade Journal & Paper Trader
  * =====================================================
  * Registra e simula operações em tempo real.
- * Calcula métricas profissionais:
- *   - Win Rate, Profit Factor, Sharpe, Sortino
- *   - Curva de patrimônio, Drawdown máximo
- *   - Diário detalhado de cada operação
+ * Salva no LocalStorage para persistir entre as telas.
  * =====================================================
  */
 (function () {
     'use strict';
+
+    const STORAGE_KEY = '@Brdolwin:AtlasJournal';
 
     const TradeJournal = {
         trades: [],
@@ -19,6 +18,44 @@
         equity: 50000,
         peakEquity: 50000,
         maxDrawdown: 0,
+
+        /**
+         * Inicializa o Journal, carregando dados salvos
+         */
+        init() {
+            this.loadFromStorage();
+        },
+
+        loadFromStorage() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    this.trades = parsed.trades || [];
+                    this.openTrade = parsed.openTrade || null;
+                    this.equity = parsed.equity || this.startingCapital;
+                    this.peakEquity = parsed.peakEquity || this.startingCapital;
+                    this.maxDrawdown = parsed.maxDrawdown || 0;
+                }
+            } catch (e) {
+                console.error('Erro ao carregar Trade Journal do storage:', e);
+            }
+        },
+
+        saveToStorage() {
+            try {
+                const data = {
+                    trades: this.trades,
+                    openTrade: this.openTrade,
+                    equity: this.equity,
+                    peakEquity: this.peakEquity,
+                    maxDrawdown: this.maxDrawdown
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.error('Erro ao salvar Trade Journal no storage:', e);
+            }
+        },
 
         /**
          * Abre uma nova operação simulada
@@ -36,7 +73,6 @@
                 lotes: params.lotes || 1,
                 reason: params.reason || '',
                 confidence: params.confidence || 0,
-                strategies: params.strategies || [],
                 entryTime: new Date().toISOString(),
                 exitPrice: null,
                 exitTime: null,
@@ -44,6 +80,8 @@
                 pnlBRL: null,
                 result: null
             };
+            
+            this.saveToStorage();
             return this.openTrade;
         },
 
@@ -65,7 +103,11 @@
             }
 
             // Valor por ponto (WIN = R$0.20/ponto, WDO = R$10/ponto)
-            const pointValue = trade.asset === 'win' ? 0.20 : 10.00;
+            // Para forex, vamos usar um multiplicador fictício de R$50 por pip para simplificar
+            const isWin = trade.asset.toLowerCase().includes('win');
+            const isWdo = trade.asset.toLowerCase().includes('wdo');
+            const pointValue = isWin ? 0.20 : (isWdo ? 10.00 : 50.00); 
+
             trade.pnlBRL = trade.pnlPoints * pointValue * trade.lotes;
             trade.result = trade.pnlBRL >= 0 ? 'WIN' : 'LOSS';
             trade.exitReason = exitReason;
@@ -83,6 +125,8 @@
             // Registrar e limpar
             this.trades.push({ ...trade });
             this.openTrade = null;
+
+            this.saveToStorage();
 
             // Registrar no Risk Manager
             if (window.BRDOLWINAtlasRisk) {
@@ -127,15 +171,14 @@
             if (total === 0) {
                 return {
                     totalTrades: 0,
+                    wins: 0,
+                    losses: 0,
                     winRate: 0,
                     profitFactor: 0,
                     sharpe: 0,
-                    sortino: 0,
                     maxDrawdown: 0,
                     equity: this.equity,
-                    avgWin: 0,
-                    avgLoss: 0,
-                    expectancy: 0
+                    pnlTotal: 0
                 };
             }
 
@@ -146,23 +189,16 @@
             const totalLossBRL = Math.abs(losses.reduce((s, t) => s + t.pnlBRL, 0));
 
             const winRate = (wins.length / total) * 100;
-            const profitFactor = totalLossBRL > 0 ? totalWinBRL / totalLossBRL : totalWinBRL > 0 ? Infinity : 0;
-            const avgWin = wins.length > 0 ? totalWinBRL / wins.length : 0;
-            const avgLoss = losses.length > 0 ? totalLossBRL / losses.length : 0;
-            const expectancy = (winRate / 100 * avgWin) - ((1 - winRate / 100) * avgLoss);
+            const profitFactor = totalLossBRL > 0 ? totalWinBRL / totalLossBRL : (totalWinBRL > 0 ? Infinity : 0);
 
-            // Sharpe Ratio (simplificado, sem risk-free)
+            // Sharpe Ratio simplificado
             const returns = this.trades.map(t => t.pnlBRL);
             const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
-            const stdDev = Math.sqrt(returns.reduce((s, r) => s + Math.pow(r - avgReturn, 2), 0) / returns.length);
+            let stdDev = 0;
+            if (returns.length > 1) {
+                stdDev = Math.sqrt(returns.reduce((s, r) => s + Math.pow(r - avgReturn, 2), 0) / (returns.length - 1));
+            }
             const sharpe = stdDev > 0 ? (avgReturn / stdDev) * Math.sqrt(252) : 0;
-
-            // Sortino (apenas downside deviation)
-            const negReturns = returns.filter(r => r < 0);
-            const downsideDev = negReturns.length > 0
-                ? Math.sqrt(negReturns.reduce((s, r) => s + Math.pow(r, 2), 0) / negReturns.length)
-                : 0;
-            const sortino = downsideDev > 0 ? (avgReturn / downsideDev) * Math.sqrt(252) : 0;
 
             return {
                 totalTrades: total,
@@ -171,47 +207,30 @@
                 winRate: winRate,
                 profitFactor: profitFactor,
                 sharpe: sharpe,
-                sortino: sortino,
                 maxDrawdown: this.maxDrawdown,
                 equity: this.equity,
-                pnlTotal: totalWinBRL - totalLossBRL,
-                avgWin: avgWin,
-                avgLoss: avgLoss,
-                expectancy: expectancy
+                pnlTotal: totalWinBRL - totalLossBRL
             };
         },
 
-        /**
-         * Retorna o equity curve como array [{ timestamp, equity }]
-         */
-        getEquityCurve() {
-            let eq = this.startingCapital;
-            const curve = [{ timestamp: null, equity: eq }];
-            this.trades.forEach(t => {
-                eq += t.pnlBRL;
-                curve.push({ timestamp: t.exitTime, equity: eq });
-            });
-            return curve;
-        },
-
-        /**
-         * Retorna os últimos N trades
-         */
         getRecentTrades(n = 10) {
-            return this.trades.slice(-n).reverse();
+            return [...this.trades].reverse().slice(0, n);
         },
 
-        /**
-         * Reset completo
-         */
+        getAllTrades() {
+            return [...this.trades].reverse(); // Mais recentes primeiro
+        },
+
         reset() {
             this.trades = [];
             this.openTrade = null;
             this.equity = this.startingCapital;
             this.peakEquity = this.startingCapital;
             this.maxDrawdown = 0;
+            this.saveToStorage();
         }
     };
 
+    TradeJournal.init();
     window.BRDOLWINAtlasJournal = TradeJournal;
 })();

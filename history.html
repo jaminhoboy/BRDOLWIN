@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico Real | BRDOLWIN Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <style>
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--fonte-dados);
+        }
+        .history-table th, .history-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .history-table th {
+            color: var(--cor-text-muted);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            font-family: var(--fonte-principal);
+            letter-spacing: 0.05em;
+        }
+        .history-table tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        .badge-gain {
+            background: rgba(52, 211, 153, 0.1);
+            color: #34D399;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .badge-loss {
+            background: rgba(248, 113, 113, 0.1);
+            color: #F87171;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .badge-open {
+            background: rgba(148, 163, 184, 0.1);
+            color: #94A3B8;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .direction-buy { color: #34D399; font-weight: bold; }
+        .direction-sell { color: #F87171; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-card">
+            <div class="sidebar-logo">
+                <i data-lucide="activity"></i> BRDOLWIN
+            </div>
+            <nav class="nav-menu">
+                <a href="indice.html" class="nav-link"><i data-lucide="trending-up"></i> Mini Índice</a>
+                <a href="dolar.html" class="nav-link"><i data-lucide="dollar-sign"></i> Mini Dólar</a>
+                <a href="forex.html" class="nav-link"><i data-lucide="globe"></i> Forex</a>
+                <a href="macro.html" class="nav-link"><i data-lucide="radar"></i> Radar Macro</a>
+                <a href="history.html" class="nav-link active"><i data-lucide="history"></i> Histórico</a>
+                <a href="admin.html" class="nav-link" id="adminSidebarLink" style="display: none; color: #F87171;"><i data-lucide="lock"></i> Bastidores</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="flex-between mb-2">
+                    <span class="text-muted text-sm">Plano Atual</span>
+                    <span id="userPlanBadge" class="badge">PRO</span>
+                </div>
+                <button onclick="window.BRDOLWINAuth.logout()" class="btn-secondary w-100 text-sm flex-center gap-2">
+                    <i data-lucide="log-out" style="width: 14px;"></i> Desconectar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div>
+                    <h1 class="text-xl font-bold flex-center gap-2"><i data-lucide="history" class="text-blue"></i> Histórico de Entradas</h1>
+                    <p class="text-sm text-muted mt-1">Desempenho Real das Recomendações do Atlas AI</p>
+                </div>
+                <div class="flex-center gap-4">
+                    <div class="financial-data text-sm text-muted" id="clockDisplay">00:00:00</div>
+                    <div class="divider-v"></div>
+                    <div class="text-sm font-medium" id="userNameDisplay">Usuário</div>
+                </div>
+            </header>
+
+            <div class="content-scroll">
+                
+                <!-- Visão Geral do Desempenho -->
+                <div class="grid-4" style="margin-bottom: 2rem;">
+                    <div class="glass-card metric-card">
+                        <span class="metric-label">P&L Total Acumulado</span>
+                        <div class="metric-value" id="historyPnlTotal">R$ 0,00</div>
+                    </div>
+                    <div class="glass-card metric-card">
+                        <span class="metric-label">Taxa de Acerto (Win Rate)</span>
+                        <div class="metric-value" id="historyWinRate">0.0%</div>
+                    </div>
+                    <div class="glass-card metric-card">
+                        <span class="metric-label">Total de Entradas</span>
+                        <div class="metric-value text-light" id="historyTotalTrades">0</div>
+                    </div>
+                    <div class="glass-card metric-card">
+                        <span class="metric-label">Profit Factor</span>
+                        <div class="metric-value text-light" id="historyProfitFactor">0.00</div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Histórico -->
+                <div class="glass-card" style="padding: 1.5rem; overflow-x: auto;">
+                    <div class="flex-between mb-4">
+                        <h3 class="text-lg font-bold">Relatório Detalhado</h3>
+                        <button class="btn-secondary text-sm flex-center gap-2" id="btnExportCSV">
+                            <i data-lucide="download" style="width: 14px;"></i> Exportar CSV
+                        </button>
+                    </div>
+                    
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Ativo</th>
+                                <th>Direção</th>
+                                <th>Entrada</th>
+                                <th>Saída</th>
+                                <th>Motivo Saída</th>
+                                <th>Resultado</th>
+                                <th>P&L (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                    <div id="emptyHistory" style="text-align: center; padding: 3rem; display: none;">
+                        <i data-lucide="inbox" style="width: 48px; height: 48px; color: var(--cor-text-muted); margin-bottom: 1rem;"></i>
+                        <p class="text-muted">Nenhuma entrada foi recomendada pelo Atlas AI ainda.</p>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/core/supabase-client.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script src="js/core/router.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/atlas/trade-journal.js"></script>
+    <script src="js/pages/history-page.js"></script>
+    
+    <script>
+        lucide.createIcons();
+        window.BRDOLWINRouter.checkAuth();
+        setInterval(() => { document.getElementById('clockDisplay').textContent = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+    </script>
+</body>
+</html>
