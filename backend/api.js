@@ -68,7 +68,7 @@ async function fetchYahooQuote(symbol) {
 }
 
 export async function getAllMarketData() {
-    const [ibov, dolar, dxy, sp500, vix, oil, eurusd, usdjpy, gbpusd] = await Promise.allSettled([
+    const promises = await Promise.allSettled([
         fetchYahooQuote('^BVSP'),
         fetchYahooQuote('BRL=X'),
         fetchYahooQuote('DX-Y.NYB'),
@@ -78,21 +78,35 @@ export async function getAllMarketData() {
         fetchYahooQuote('EURUSD=X'),
         fetchYahooQuote('USDJPY=X'),
         fetchYahooQuote('GBPUSD=X'),
+        fetchYahooQuote('AUDUSD=X'),
+        fetchYahooQuote('USDCAD=X'),
+        fetchYahooQuote('USDCHF=X'),
+        fetchYahooQuote('NZDUSD=X'),
+        fetchYahooQuote('EURJPY=X'),
+        fetchYahooQuote('GBPJPY=X'),
+        fetchYahooQuote('EURGBP=X'),
     ]);
 
     const val = (r) => r.status === 'fulfilled' ? r.value : null;
 
     return {
-        ibov:   val(ibov),
-        win:    val(ibov),   // alias — WIN segue IBOV
-        dolar:  val(dolar),
-        wdo:    val(dolar),  // alias — WDO segue Dólar
-        dxy:    val(dxy),
-        sp500:  val(sp500),
-        vix:    val(vix),
-        oil:    val(oil),
-        eurusd: val(eurusd),
-        usdjpy: val(usdjpy),
-        gbpusd: val(gbpusd),
+        ibov:   val(promises[0]),
+        win:    val(promises[0]),
+        dolar:  val(promises[1]),
+        wdo:    val(promises[1]),
+        dxy:    val(promises[2]),
+        sp500:  val(promises[3]),
+        vix:    val(promises[4]),
+        oil:    val(promises[5]),
+        eurusd: val(promises[6]),
+        usdjpy: val(promises[7]),
+        gbpusd: val(promises[8]),
+        audusd: val(promises[9]),
+        usdcad: val(promises[10]),
+        usdchf: val(promises[11]),
+        nzdusd: val(promises[12]),
+        eurjpy: val(promises[13]),
+        gbpjpy: val(promises[14]),
+        eurgbp: val(promises[15]),
     };
 }
