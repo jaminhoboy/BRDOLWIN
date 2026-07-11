@@ -28,13 +28,27 @@ const SETTINGS_SYNC_MS = parseInt(process.env.SETTINGS_SYNC_INTERVAL_MS || '3000
 // ─── Estado Global do Bot ─────────────────────────────
 const memory = new MarketMemory(200);
 
-let settings = {
-    threshold: 70,
-    weights: {
-        trend: 20, momentum: 15, meanReversion: 15, volatility: 10,
-        correlation: 10, smartMoney: 15, statistical: 10, breakout: 5,
-    }
+let settings = { threshold: 70 };
+
+// Perfis de peso por tipo de mercado
+const WEIGHTS_B3 = {
+    trend: 20, momentum: 15, meanReversion: 3, volatility: 2,
+    correlation: 22, smartMoney: 28, statistical: 10, breakout: 0,
 };
+const WEIGHTS_FOREX_MAJOR = {
+    trend: 18, momentum: 15, meanReversion: 5, volatility: 0,
+    correlation: 12, smartMoney: 30, statistical: 20, breakout: 0,
+};
+const WEIGHTS_FOREX_JPY = {
+    trend: 20, momentum: 25, meanReversion: 2, volatility: 0,
+    correlation: 10, smartMoney: 25, statistical: 18, breakout: 0,
+};
+
+function getWeightsForAsset(asset) {
+    if (['win', 'wdo'].includes(asset)) return WEIGHTS_B3;
+    if (['usdjpy', 'eurjpy', 'gbpjpy'].includes(asset)) return WEIGHTS_FOREX_JPY;
+    return WEIGHTS_FOREX_MAJOR;
+}
 
 // Risk Manager (em memória)
 const risk = {
@@ -104,22 +118,23 @@ function canTrade(context = {}) {
     return { allowed: true, reason: 'Autorizado' };
 }
 
-function calcConsensus(signals) {
+function calcConsensus(signals, weights) {
     let buyScore = 0, sellScore = 0, totalWeight = 0;
     const reasons = [];
 
     for (const [name, signal] of Object.entries(signals)) {
-        const weight = settings.weights[name] || 10;
+        const weight = weights[name] ?? 0;
+        if (weight === 0) continue;
         const contribution = (signal.confidence / 100) * weight;
         totalWeight += weight;
-        if (signal.direction === 'buy') { buyScore += contribution; }
-        else if (signal.direction === 'sell') { sellScore += contribution; }
+        if (signal.direction === 'buy')  buyScore  += contribution;
+        else if (signal.direction === 'sell') sellScore += contribution;
         if (signal.direction !== 'neutral' && signal.confidence > 40) reasons.push(`${name}: ${signal.reason}`);
     }
 
-    const maxScore = Math.max(buyScore, sellScore);
+    const maxScore   = Math.max(buyScore, sellScore);
     const confidence = totalWeight > 0 ? (maxScore / totalWeight) * 100 : 0;
-    const direction = buyScore > sellScore ? 'buy' : sellScore > buyScore ? 'sell' : 'neutral';
+    const direction  = buyScore > sellScore ? 'buy' : sellScore > buyScore ? 'sell' : 'neutral';
 
     return { direction, confidence: Math.round(confidence), buyScore: Math.round(buyScore), sellScore: Math.round(sellScore), reasons };
 }
@@ -157,9 +172,14 @@ async function tick() {
         // 1. Busca cotações
         const marketData = await getAllMarketData();
 
-        // 2. Alimenta memória
-        const assets = ['win', 'wdo', 'eurusd', 'usdjpy', 'gbpusd'];
-        for (const asset of assets) {
+        // 2. Alimenta memória — TODOS os 12 ativos
+        const ALL_ASSETS = [
+            'win', 'wdo',
+            'eurusd', 'usdjpy', 'gbpusd',
+            'audusd', 'usdcad', 'usdchf', 'nzdusd',
+            'eurjpy', 'gbpjpy', 'eurgbp',
+        ];
+        for (const asset of ALL_ASSETS) {
             if (marketData[asset]?.price) {
                 memory.addTick(asset, marketData[asset].price);
             }
@@ -212,28 +232,30 @@ async function tick() {
         // 4. Analisar cada ativo e verificar novos sinais
         const globalCtx = {
             sp500: marketData.sp500,
-            dxy: marketData.dxy,
-            vix: marketData.vix
+            dxy:   marketData.dxy,
+            vix:   marketData.vix,
+            oil:   marketData.oil,
         };
 
-        for (const asset of assets) {
+        for (const asset of ALL_ASSETS) {
             const snapshot = memory.getSnapshot(asset);
             if (!snapshot.ready) continue;
 
-            // 5. Executar as 8 estratégias
+            // 5. Executar as 8 estratégias com contexto correto por ativo
             const signals = {
                 trend:         Strategies.trend(snapshot),
                 momentum:      Strategies.momentum(snapshot),
                 meanReversion: Strategies.meanReversion(snapshot),
                 volatility:    Strategies.volatility(snapshot),
-                correlation:   Strategies.correlation(snapshot, globalCtx),
+                correlation:   Strategies.correlation(snapshot, globalCtx, asset),
                 smartMoney:    Strategies.smartMoney(snapshot),
-                statistical:   Strategies.statistical(),
+                statistical:   Strategies.statistical(asset),
                 breakout:      Strategies.breakout(snapshot),
             };
 
-            // 6. Consenso ponderado
-            const verdict = calcConsensus(signals);
+            // 6. Consenso ponderado com perfil de peso correto
+            const weights = getWeightsForAsset(asset);
+            const verdict = calcConsensus(signals, weights);
 
             // 7. Risk Manager
             const vixPrice = marketData.vix?.price ?? 0;

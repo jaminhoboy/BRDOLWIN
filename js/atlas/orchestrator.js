@@ -1,164 +1,209 @@
 /**
  * =====================================================
- * ATLAS AI — Orchestrator (Cérebro Central)
+ * ATLAS AI — Orchestrator v2.0 (Cérebro Central)
  * =====================================================
- * O Orquestrador é o motor central de decisão.
- * Ele:
- *   1. Alimenta o MarketMemory com ticks
- *   2. Executa as 8 estratégias em paralelo
- *   3. Calcula o consenso ponderado
- *   4. Consulta o RiskManager
- *   5. Dispara Alertas (Pop-ups) via AlertManager
- *   6. Executa Paper Trades via TradeJournal
- *   7. Emite o veredito final para a UI
+ * v2.0 — Perfis de peso distintos por tipo de mercado:
+ *   • B3 Futuros (WIN, WDO)
+ *   • Forex Majors (EUR/USD, GBP/USD, AUD/USD, USD/CAD, USD/CHF, NZD/USD, EUR/GBP)
+ *   • Forex JPY Crosses (USD/JPY, EUR/JPY, GBP/JPY)
+ *
+ * Corrige: análise de todos os 10 pares forex, Memory
+ * feeding completo, statistical correto por mercado.
  * =====================================================
  */
 (function () {
     'use strict';
 
+    // ─── Perfis de Peso por Tipo de Mercado ─────────────
+
+    // B3 Futuros: Smart Money + Macro dominam
+    const WEIGHTS_B3 = {
+        trend:         20,
+        momentum:      15,
+        meanReversion:  3,
+        volatility:     2,
+        correlation:   22,
+        smartMoney:    28,
+        statistical:   10,
+        breakout:       0,
+    };
+
+    // Forex Majors: ICT Liquidity + Sessão + Tendência
+    const WEIGHTS_FOREX_MAJOR = {
+        trend:         18,
+        momentum:      15,
+        meanReversion:  5,
+        volatility:     0,
+        correlation:   12,
+        smartMoney:    30,
+        statistical:   20,
+        breakout:       0,
+    };
+
+    // Forex JPY Crosses: Momentum + Smart Money + Sessão Tóquio
+    const WEIGHTS_FOREX_JPY = {
+        trend:         20,
+        momentum:      25,
+        meanReversion:  2,
+        volatility:     0,
+        correlation:   10,
+        smartMoney:    25,
+        statistical:   18,
+        breakout:       0,
+    };
+
+    // Mapa de ativo → perfil de peso
+    function getWeightsForAsset(asset) {
+        const b3      = ['win', 'wdo'];
+        const jpyCross = ['usdjpy', 'eurjpy', 'gbpjpy'];
+        if (b3.includes(asset))       return WEIGHTS_B3;
+        if (jpyCross.includes(asset)) return WEIGHTS_FOREX_JPY;
+        return WEIGHTS_FOREX_MAJOR;
+    }
+
+    // Todos os ativos analisados
+    const ALL_ASSETS = [
+        'win', 'wdo',
+        'eurusd', 'usdjpy', 'gbpusd',
+        'audusd', 'usdcad', 'usdchf', 'nzdusd',
+        'eurjpy', 'gbpjpy', 'eurgbp',
+    ];
+
+    // Mapa de state key → asset key (para memória)
+    const STATE_MAP = {
+        win: 'win', wdo: 'wdo',
+        eurusd: 'eurusd', usdjpy: 'usdjpy', gbpusd: 'gbpusd',
+        audusd: 'audusd', usdcad: 'usdcad', usdchf: 'usdchf',
+        nzdusd: 'nzdusd', eurjpy: 'eurjpy', gbpjpy: 'gbpjpy', eurgbp: 'eurgbp',
+    };
+
+    const ASSET_DISPLAY = {
+        win: 'WINV26', wdo: 'WDOV26',
+        eurusd: 'EUR/USD', usdjpy: 'USD/JPY', gbpusd: 'GBP/USD',
+        audusd: 'AUD/USD', usdcad: 'USD/CAD', usdchf: 'USD/CHF',
+        nzdusd: 'NZD/USD', eurjpy: 'EUR/JPY', gbpjpy: 'GBP/JPY',
+        eurgbp: 'EUR/GBP',
+    };
+
+    // ─── Orchestrator ────────────────────────────────────
+
     const Orchestrator = {
-        // Pesos de cada estratégia (soma = 100)
-        weights: {
-            trend: 20,
-            momentum: 15,
-            meanReversion: 15,
-            volatility: 10,
-            correlation: 10,
-            smartMoney: 15,
-            statistical: 10,
-            breakout: 5
-        },
-
-        // Threshold para considerar sinal "claro"
         ALERT_THRESHOLD: 70,
+        ALERT_COOLDOWN:  60000,
+        lastAlertTime:   {},
+        lastVerdict:     {},
+        updateInterval:  null,
 
-        // Cooldown entre alertas (evita spam) em ms
-        ALERT_COOLDOWN: 60000, // 1 minuto
-        lastAlertTime: {},
-
-        // Último veredito por ativo
-        lastVerdict: {},
-
-        // Intervalo de atualização
-        updateInterval: null,
-
-        /**
-         * Inicializa o orquestrador, conectando ao MarketState
-         */
         init() {
             if (!window.BRDOLWINState) {
                 console.warn('[Atlas Orchestrator] BRDOLWINState não encontrado. Aguardando...');
                 return;
             }
 
-            // Carrega config inicial se existir
+            // Carrega threshold das configurações
             if (window.BRDOLWINAtlasSettings) {
                 const conf = window.BRDOLWINAtlasSettings.getSettings();
-                this.weights = { ...conf.weights };
                 this.ALERT_THRESHOLD = conf.threshold;
             }
 
-            // Subscreve ao estado do mercado
             window.BRDOLWINState.subscribe((state) => {
                 this.processState(state);
             });
 
-            console.log('[Atlas Orchestrator] ✅ Inicializado e escutando MarketState');
+            console.log('[Atlas Orchestrator] ✅ v2.0 — 12 ativos, 3 perfis de peso, Statistical B3/Forex');
         },
 
         updateConfig(config) {
-            this.weights = { ...config.weights };
             this.ALERT_THRESHOLD = config.threshold;
-            console.log('[Atlas Orchestrator] Configurações atualizadas dinamicamente.');
+            console.log('[Atlas Orchestrator] Threshold atualizado:', config.threshold);
         },
 
-        /**
-         * Processa o estado do mercado (chamado a cada tick)
-         */
         processState(state) {
-            const Memory = window.BRDOLWINAtlasMemory;
+            const Memory     = window.BRDOLWINAtlasMemory;
             const Strategies = window.BRDOLWINAtlasStrategies;
-            const Risk = window.BRDOLWINAtlasRisk;
-            const Journal = window.BRDOLWINAtlasJournal;
+            const Risk       = window.BRDOLWINAtlasRisk;
+            const Journal    = window.BRDOLWINAtlasJournal;
 
             if (!Memory || !Strategies || !Risk) return;
 
-            // ── 1. Alimentar Memória ──
-            if (state.win && state.win.price) {
-                Memory.addTick('win', state.win.price);
-            }
-            if (state.wdo && state.wdo.price) {
-                Memory.addTick('wdo', state.wdo.price);
-            }
-            if (state.eurusd && state.eurusd.price) {
-                Memory.addTick('eurusd', state.eurusd.price);
+            // ── 1. Alimentar Memória para TODOS os ativos ──
+            for (const [stateKey, assetKey] of Object.entries(STATE_MAP)) {
+                if (state[stateKey]?.price) {
+                    Memory.addTick(assetKey, state[stateKey].price);
+                }
             }
 
-            // ── 2. Analisar cada ativo ──
-            const assets = ['win', 'wdo', 'eurusd', 'usdjpy', 'gbpusd'];
+            // ── 2. Contexto macro global ──
             const globalCtx = {
                 sp500: state.sp500,
-                dxy: state.dxy,
-                vix: state.vix
+                dxy:   state.dxy,
+                vix:   state.vix,
+                oil:   state.oil,
+                gold:  state.gold,
             };
 
-            assets.forEach(asset => {
+            // ── 3. Analisar TODOS os ativos ──
+            for (const asset of ALL_ASSETS) {
                 const snapshot = Memory.getSnapshot(asset);
-                if (!snapshot.ready) return;
+                if (!snapshot.ready) continue;
 
-                // ── 3. Executar as 8 estratégias ──
+                // ── 4. Executar as 8 estratégias com contexto correto ──
                 const signals = {
-                    trend: Strategies.trend(snapshot),
-                    momentum: Strategies.momentum(snapshot),
+                    trend:         Strategies.trend(snapshot),
+                    momentum:      Strategies.momentum(snapshot),
                     meanReversion: Strategies.meanReversion(snapshot),
-                    volatility: Strategies.volatility(snapshot),
-                    correlation: Strategies.correlation(snapshot, globalCtx),
-                    smartMoney: Strategies.smartMoney(snapshot),
-                    statistical: Strategies.statistical(),
-                    breakout: Strategies.breakout(snapshot)
+                    volatility:    Strategies.volatility(snapshot),
+                    correlation:   Strategies.correlation(snapshot, globalCtx, asset),
+                    smartMoney:    Strategies.smartMoney(snapshot),
+                    statistical:   Strategies.statistical(asset),  // B3 ou Forex por asset
+                    breakout:      Strategies.breakout(snapshot),
                 };
 
-                // ── 4. Calcular consenso ponderado ──
-                const verdict = this.calcConsensus(signals, asset);
-                verdict.signals = signals;
-                verdict.snapshot = snapshot;
+                // ── 5. Consenso ponderado com perfil correto ──
+                const weights = getWeightsForAsset(asset);
+                const verdict = this.calcConsensus(signals, asset, weights);
+                verdict.signals    = signals;
+                verdict.snapshot   = snapshot;
                 verdict.riskStatus = Risk.getStatus();
+                verdict.weights    = weights;
 
-                // ── 5. Verificar Risk Manager ──
-                const vixVal = state.vix ? state.vix.price : 0;
+                // ── 6. Risk Manager ──
+                const vixVal   = state.vix?.price ?? 0;
                 const riskCheck = Risk.canTrade({ vix: vixVal, asset });
                 verdict.riskAllowed = riskCheck.allowed;
-                verdict.riskReason = riskCheck.reason;
+                verdict.riskReason  = riskCheck.reason;
 
-                // ── 6. Disparar Alerta se sinal forte ──
-                if (verdict.confidence >= this.ALERT_THRESHOLD && riskCheck.allowed &&
-                    verdict.direction !== 'neutral') {
+                // ── 7. Disparar Alerta se sinal forte ──
+                if (
+                    verdict.confidence >= this.ALERT_THRESHOLD &&
+                    riskCheck.allowed &&
+                    verdict.direction !== 'neutral'
+                ) {
                     this.tryFireAlert(asset, verdict, snapshot);
                 }
 
-                // ── 7. Checar Paper Trading ──
-                if (Journal && Journal.openTrade && Journal.openTrade.asset === asset) {
+                // ── 8. Checar Paper Trading ──
+                if (Journal?.openTrade?.asset === asset) {
                     const closedTrade = Journal.checkStopTarget(snapshot.lastPrice);
                     if (closedTrade) {
-                        console.log(`[Atlas] Paper Trade fechado: ${closedTrade.result} | PnL: R$ ${closedTrade.pnlBRL.toFixed(2)}`);
+                        console.log(`[Atlas] Paper Trade fechado: ${closedTrade.result} | PnL: R$ ${closedTrade.pnlBRL?.toFixed(2)}`);
                     }
                 }
 
-                // Salvar último veredito
                 this.lastVerdict[asset] = verdict;
-            });
+            }
         },
 
-        /**
-         * Calcula o consenso ponderado dos sinais
-         */
-        calcConsensus(signals, asset) {
+        calcConsensus(signals, asset, weights) {
             let buyScore = 0, sellScore = 0, totalWeight = 0;
-            let buyStrategies = [], sellStrategies = [];
+            const buyStrategies  = [];
+            const sellStrategies = [];
             const reasons = [];
 
-            Object.entries(signals).forEach(([name, signal]) => {
-                const weight = this.weights[name] || 10;
+            for (const [name, signal] of Object.entries(signals)) {
+                const weight = weights[name] ?? 0;
+                if (weight === 0) continue; // estratégia desativada para este perfil
+
                 const contribution = (signal.confidence / 100) * weight;
 
                 if (signal.direction === 'buy') {
@@ -170,28 +215,25 @@
                 }
 
                 totalWeight += weight;
-                if (signal.confidence > 40) {
-                    reasons.push(`${name}: ${signal.reason}`);
-                }
-            });
+                if (signal.confidence > 40) reasons.push(`${name}: ${signal.reason}`);
+            }
 
-            // Normalizar para 0-100
-            const normalizedBuy = (buyScore / totalWeight) * 100;
-            const normalizedSell = (sellScore / totalWeight) * 100;
+            const normalizedBuy  = totalWeight > 0 ? (buyScore  / totalWeight) * 100 : 0;
+            const normalizedSell = totalWeight > 0 ? (sellScore / totalWeight) * 100 : 0;
 
             let direction, confidence, consensusStrategies;
 
             if (normalizedBuy > normalizedSell && normalizedBuy > 30) {
-                direction = 'buy';
-                confidence = Math.round(normalizedBuy);
+                direction          = 'buy';
+                confidence         = Math.round(normalizedBuy);
                 consensusStrategies = buyStrategies;
             } else if (normalizedSell > normalizedBuy && normalizedSell > 30) {
-                direction = 'sell';
-                confidence = Math.round(normalizedSell);
+                direction          = 'sell';
+                confidence         = Math.round(normalizedSell);
                 consensusStrategies = sellStrategies;
             } else {
-                direction = 'neutral';
-                confidence = Math.round(Math.max(normalizedBuy, normalizedSell));
+                direction          = 'neutral';
+                confidence         = Math.round(Math.max(normalizedBuy, normalizedSell));
                 consensusStrategies = [];
             }
 
@@ -199,22 +241,18 @@
                 asset,
                 direction,
                 confidence,
-                buyScore: Math.round(normalizedBuy),
-                sellScore: Math.round(normalizedSell),
+                buyScore:           Math.round(normalizedBuy),
+                sellScore:          Math.round(normalizedSell),
                 consensusStrategies,
-                strategiesAligned: consensusStrategies.length,
-                reasons: reasons.slice(0, 4), // Top 4 razões
-                timestamp: Date.now()
+                strategiesAligned:  consensusStrategies.length,
+                reasons:            reasons.slice(0, 5),
+                timestamp:          Date.now(),
             };
         },
 
-        /**
-         * Tenta disparar um alerta (com cooldown)
-         */
         tryFireAlert(asset, verdict, snapshot) {
-            const now = Date.now();
+            const now      = Date.now();
             const lastTime = this.lastAlertTime[asset] || 0;
-
             if (now - lastTime < this.ALERT_COOLDOWN) return;
 
             this.lastAlertTime[asset] = now;
@@ -223,98 +261,70 @@
             if (!Alerts) return;
 
             const price = snapshot.lastPrice;
-            const atr = snapshot.atr || 100;
+            const atr   = snapshot.atr || price * 0.002;
 
-            // Calcular stops e alvos dinamicamente pelo ATR
-            let entry, stop, target;
-            if (verdict.direction === 'buy') {
-                entry = price;
-                stop = price - atr * 1.5;
-                target = price + atr * 2.5;
-            } else {
-                entry = price;
-                stop = price + atr * 1.5;
-                target = price - atr * 2.5;
-            }
+            const entry  = price;
+            const stop   = verdict.direction === 'buy'  ? price - atr * 1.5 : price + atr * 1.5;
+            const target = verdict.direction === 'buy'  ? price + atr * 2.5 : price - atr * 2.5;
 
-            const formatAssetName = (ast) => {
-                const map = {
-                    'win': 'WINV26', 'wdo': 'WDOV26',
-                    'eurusd': 'EUR/USD', 'usdjpy': 'USD/JPY', 'gbpusd': 'GBP/USD'
-                };
-                return map[ast] || ast.toUpperCase();
-            };
-            const assetName = formatAssetName(asset);
+            const assetName = ASSET_DISPLAY[asset] || asset.toUpperCase();
 
             Alerts.showEntryAlert({
-                asset: assetName,
+                asset:     assetName,
                 direction: verdict.direction,
-                entry: entry,
-                stop: stop,
-                target: target,
-                reason: `Consenso de ${verdict.strategiesAligned} estratégias (${verdict.confidence}%): ${verdict.reasons[0] || ''}`
+                entry, stop, target,
+                reason: `Consenso de ${verdict.strategiesAligned} estratégias (${verdict.confidence}%): ${verdict.reasons[0] || ''}`,
             });
 
-            console.log(`[Atlas Alert] 🔔 ${verdict.direction.toUpperCase()} ${assetName} @ ${price} | Confiança: ${verdict.confidence}%`);
+            console.log(`[Atlas Alert] 🔔 ${verdict.direction.toUpperCase()} ${assetName} @ ${price.toFixed(4)} | Confiança: ${verdict.confidence}% | Perfil: ${ASSET_DISPLAY[asset]}`);
         },
 
-        /**
-         * Retorna o veredito mais recente para um ativo
-         */
         getVerdict(asset) {
             return this.lastVerdict[asset] || null;
         },
 
-        /**
-         * Retorna o veredito formatado para a UI
-         */
         getVerdictForUI(asset) {
             const v = this.lastVerdict[asset];
             if (!v) {
                 return {
-                    label: 'Aguardando dados...',
-                    color: 'var(--cor-texto-secundario)',
-                    icon: 'loader',
-                    confidence: 0,
-                    signals: {}
+                    label:      'Aguardando dados...',
+                    color:      'var(--cor-texto-secundario)',
+                    icon:       'loader',
+                    confidence:  0,
+                    buyScore:    0,
+                    sellScore:   0,
+                    signals:    {},
                 };
             }
 
-            const labels = {
-                buy: '🟢 COMPRA',
-                sell: '🔴 VENDA',
-                neutral: '⚪ NEUTRO'
-            };
+            const labels = { buy: '🟢 COMPRA', sell: '🔴 VENDA', neutral: '⚪ NEUTRO' };
             const colors = {
-                buy: 'var(--cor-sucesso)',
-                sell: 'var(--cor-alerta-vermelho)',
-                neutral: 'var(--cor-texto-secundario)'
+                buy:     'var(--cor-sucesso)',
+                sell:    'var(--cor-alerta-vermelho)',
+                neutral: 'var(--cor-texto-secundario)',
             };
 
             return {
-                label: labels[v.direction] || 'Neutro',
-                color: colors[v.direction],
-                confidence: v.confidence,
-                buyScore: v.buyScore,
-                sellScore: v.sellScore,
-                strategiesAligned: v.strategiesAligned,
-                reasons: v.reasons,
-                riskAllowed: v.riskAllowed,
-                riskReason: v.riskReason,
-                signals: v.signals,
-                riskStatus: v.riskStatus,
-                timestamp: v.timestamp
+                label:              labels[v.direction] || 'Neutro',
+                color:              colors[v.direction],
+                confidence:         v.confidence,
+                buyScore:           v.buyScore,
+                sellScore:          v.sellScore,
+                strategiesAligned:  v.strategiesAligned,
+                reasons:            v.reasons,
+                riskAllowed:        v.riskAllowed,
+                riskReason:         v.riskReason,
+                signals:            v.signals,
+                riskStatus:         v.riskStatus,
+                weights:            v.weights,
+                timestamp:          v.timestamp,
             };
-        }
+        },
     };
 
     window.BRDOLWINAtlasOrchestrator = Orchestrator;
 
-    // Inicializa após o DOM carregar
     document.addEventListener('DOMContentLoaded', () => {
-        // Pequeno delay para garantir que MarketState já inicializou
-        setTimeout(() => {
-            Orchestrator.init();
-        }, 2000);
+        setTimeout(() => { Orchestrator.init(); }, 2000);
     });
 })();
