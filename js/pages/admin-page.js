@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Verificar se o usuário é Administrador
     if (!window.BRDOLWINAuth.isAdmin()) {
         alert("Acesso Negado. Você não tem privilégios de Administrador.");
-        window.location.href = 'dashboard.html';
+        window.location.href = 'indice.html';
         return;
     }
 

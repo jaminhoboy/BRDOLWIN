@@ -19,5 +19,22 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/dashboard",
+      "destination": "/indice",
+      "permanent": true
+    },
+    {
+      "source": "/operational",
+      "destination": "/dolar",
+      "permanent": true
+    },
+    {
+      "source": "/heatmap",
+      "destination": "/indice",
+      "permanent": true
+    }
   ]
 }
