@@ -22,30 +22,59 @@
         /**
          * Inicializa o Journal, carregando dados salvos
          */
-        init() {
-            this.loadFromStorage();
+        async init() {
+            await this.loadFromStorage();
         },
 
-        loadFromStorage() {
+        async loadFromStorage() {
             try {
+                // Recupera dados locais (Open Trade, Capital, Drawdown)
                 const data = localStorage.getItem(STORAGE_KEY);
                 if (data) {
                     const parsed = JSON.parse(data);
-                    this.trades = parsed.trades || [];
+                    // Não carrega trades fechados daqui (vamos buscar da nuvem)
                     this.openTrade = parsed.openTrade || null;
                     this.equity = parsed.equity || this.startingCapital;
                     this.peakEquity = parsed.peakEquity || this.startingCapital;
                     this.maxDrawdown = parsed.maxDrawdown || 0;
+                }
+
+                // Tenta recuperar os trades fechados da Nuvem (Supabase)
+                if (window.supabaseClient && window.BRDOLWINAuth) {
+                    const user = window.BRDOLWINAuth.getCurrentUser();
+                    if (user) {
+                        const { data: cloudTrades, error } = await window.supabaseClient
+                            .from('atlas_trades')
+                            .select('*')
+                            .eq('user_id', user.id)
+                            .order('created_at', { ascending: true });
+                            
+                        if (!error && cloudTrades) {
+                            // Mapeia colunas do BD de volta pro formato do app
+                            this.trades = cloudTrades.map(t => ({
+                                id: t.id,
+                                asset: t.asset,
+                                direction: t.direction,
+                                entryPrice: t.entry_price,
+                                exitPrice: t.exit_price,
+                                result: t.result,
+                                pnlBRL: t.pnl,
+                                exitReason: t.exit_reason,
+                                exitTime: t.created_at
+                            }));
+                            console.log(`[TradeJournal] ✅ ${this.trades.length} trades recuperados da Nuvem.`);
+                        }
+                    }
                 }
             } catch (e) {
                 console.error('Erro ao carregar Trade Journal do storage:', e);
             }
         },
 
-        saveToStorage() {
+        async saveToStorage() {
             try {
+                // Salva estado volátil localmente
                 const data = {
-                    trades: this.trades,
                     openTrade: this.openTrade,
                     equity: this.equity,
                     peakEquity: this.peakEquity,
@@ -54,6 +83,31 @@
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             } catch (e) {
                 console.error('Erro ao salvar Trade Journal no storage:', e);
+            }
+        },
+        
+        async saveTradeToCloud(trade) {
+            try {
+                if (window.supabaseClient && window.BRDOLWINAuth) {
+                    const user = window.BRDOLWINAuth.getCurrentUser();
+                    if (user) {
+                        const payload = {
+                            user_id: user.id,
+                            asset: trade.asset,
+                            direction: trade.direction,
+                            entry_price: trade.entryPrice,
+                            exit_price: trade.exitPrice,
+                            result: trade.result,
+                            pnl: trade.pnlBRL,
+                            exit_reason: trade.exitReason
+                        };
+                        const { error } = await window.supabaseClient.from('atlas_trades').insert([payload]);
+                        if (error) throw error;
+                        console.log(`[TradeJournal] ☁️ Trade de ${trade.asset} salvo na nuvem com sucesso.`);
+                    }
+                }
+            } catch (e) {
+                console.error('Erro ao salvar Trade na Nuvem:', e);
             }
         },
 
@@ -127,6 +181,7 @@
             this.openTrade = null;
 
             this.saveToStorage();
+            this.saveTradeToCloud(trade); // <--- Salva no Supabase
 
             // Registrar no Risk Manager
             if (window.BRDOLWINAtlasRisk) {

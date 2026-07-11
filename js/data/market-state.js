@@ -319,13 +319,13 @@
     refreshData();
 
     // Intervalo de atualização baseado no plano
-    let intervalMs = 30000; // Default: 30s
+    let intervalMs = 3000; // Default: 3s
     if (window.BRDOLWINAuth) {
       intervalMs = window.BRDOLWINAuth.getUpdateInterval();
     }
 
-    // Mínimo de 10 segundos para não sobrecarregar APIs gratuitas
-    intervalMs = Math.max(10000, intervalMs);
+    // Mínimo de 3 segundos (Sem delay / Nuvem real-time)
+    intervalMs = Math.max(3000, intervalMs);
 
     console.log(`[BRDOLWIN State] ⏱️ Atualização automática a cada ${intervalMs / 1000}s`);
 

@@ -25,7 +25,7 @@
 
   // Cache para evitar spam de requests
   const _cache = {};
-  const CACHE_TTL_MS = 30000; // 30 segundos
+  const CACHE_TTL_MS = 3000; // 3 segundos (Real-time sem scalping)
 
   // ─── Funções Internas ─────────────────────────────────
 
@@ -55,8 +55,10 @@
    * Busca dados via Yahoo Finance (usando AllOrigins como proxy CORS)
    */
   async function fetchYahooQuote(symbol) {
-    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=2d`;
-    const proxyUrl = `${ALLORIGINS_BASE}?url=${encodeURIComponent(yahooUrl)}`;
+    // Adiciona timestamp para evitar cache do próprio Yahoo
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=2d&t=${Date.now()}`;
+    // Passa disableCache=true para o AllOrigins não usar versão salva no servidor deles
+    const proxyUrl = `${ALLORIGINS_BASE}?disableCache=true&url=${encodeURIComponent(yahooUrl)}`;
 
     const data = await fetchWithCache(proxyUrl, `yahoo_${symbol}`, CACHE_TTL_MS);
     if (!data || !data.contents) return null;
