@@ -46,7 +46,7 @@
                         const { data: cloudTrades, error } = await window.supabaseClient
                             .from('atlas_trades')
                             .select('*')
-                            .eq('user_id', user.id)
+                            .eq('is_bot', true)
                             .order('created_at', { ascending: true });
                             
                         if (!error && cloudTrades) {
@@ -60,6 +60,7 @@
                                 result: t.result,
                                 pnlBRL: t.pnl,
                                 exitReason: t.exit_reason,
+                                entryTime: t.created_at,
                                 exitTime: t.created_at
                             }));
                             console.log(`[TradeJournal] ✅ ${this.trades.length} trades recuperados da Nuvem.`);

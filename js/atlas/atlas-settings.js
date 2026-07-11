@@ -35,20 +35,70 @@
             console.log('[BRDOLWIN] ⚙️ Atlas Settings Initialized');
         },
 
-        load() {
+        async load() {
             try {
-                const data = localStorage.getItem(STORAGE_KEY);
-                if (data) {
-                    this.settings = { ...defaultSettings, ...JSON.parse(data) };
+                // Fallback: carregar do localStorage enquanto carrega do DB
+                const localData = localStorage.getItem(STORAGE_KEY);
+                if (localData) {
+                    this.settings = { ...defaultSettings, ...JSON.parse(localData) };
+                }
+
+                // Sincronizar com a Nuvem se possível
+                if (window.BRDOLWINSupabase && window.BRDOLWINSupabase.supabase) {
+                    const { data, error } = await window.BRDOLWINSupabase.supabase
+                        .from('atlas_settings')
+                        .select('*')
+                        .order('updated_at', { ascending: false })
+                        .limit(1)
+                        .single();
+                        
+                    if (data && !error) {
+                        this.settings = {
+                            threshold: data.threshold,
+                            weights: {
+                                trend: data.weight_trend,
+                                momentum: data.weight_momentum,
+                                meanReversion: data.weight_mean_reversion,
+                                volatility: data.weight_volatility,
+                                correlation: data.weight_correlation,
+                                smartMoney: data.weight_smart_money,
+                                statistical: data.weight_statistical,
+                                breakout: data.weight_breakout
+                            }
+                        };
+                        // Atualiza backup local
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.settings));
+                    }
                 }
             } catch (e) {
                 console.error('Erro ao carregar configurações do Atlas:', e);
             }
         },
 
-        save() {
+        async save() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(this.settings));
+
+                if (window.BRDOLWINSupabase && window.BRDOLWINSupabase.supabase) {
+                    const payload = {
+                        threshold: this.settings.threshold,
+                        weight_trend: this.settings.weights.trend,
+                        weight_momentum: this.settings.weights.momentum,
+                        weight_mean_reversion: this.settings.weights.meanReversion,
+                        weight_volatility: this.settings.weights.volatility,
+                        weight_correlation: this.settings.weights.correlation,
+                        weight_smart_money: this.settings.weights.smartMoney,
+                        weight_statistical: this.settings.weights.statistical,
+                        weight_breakout: this.settings.weights.breakout
+                    };
+                    
+                    const { error } = await window.BRDOLWINSupabase.supabase
+                        .from('atlas_settings')
+                        .insert([payload]);
+                        
+                    if (error) console.error('[Atlas Settings] Erro salvar Supabase:', error.message);
+                }
+
                 // Notificar o Orchestrator se estiver carregado
                 if (window.BRDOLWINAtlasOrchestrator) {
                     window.BRDOLWINAtlasOrchestrator.updateConfig(this.settings);
@@ -56,7 +106,7 @@
                 
                 // Show notification
                 if (window.BRDOLWINUtils && window.BRDOLWINUtils.showToast) {
-                    window.BRDOLWINUtils.showToast('Sucesso', 'Configurações do Atlas salvas com sucesso!', 'success');
+                    window.BRDOLWINUtils.showToast('Sucesso', 'Configurações enviadas para o Bot na Nuvem!', 'success');
                 }
             } catch (e) {
                 console.error('Erro ao salvar configurações do Atlas:', e);

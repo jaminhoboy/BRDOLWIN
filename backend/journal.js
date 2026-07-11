@@ -27,9 +27,12 @@ export async function saveTrade(trade) {
             confidence:   trade.confidence,
             reason:       trade.reason,
             status:       'open',
-            opened_at:    new Date().toISOString(),
-            strategies:   JSON.stringify(trade.strategies ?? {}),
             is_bot:       true,
+            // Valores nulos até fechar
+            exit_price:   null,
+            result:       null,
+            pnl:          null,
+            exit_reason:  null
         }])
         .select()
         .single();
@@ -41,15 +44,15 @@ export async function saveTrade(trade) {
     return data;
 }
 
-export async function closeTrade(tradeId, closePrice, result, pnlBRL) {
+export async function closeTrade(tradeId, closePrice, result, pnlBRL, exitReason = 'Atlas AI') {
     const { error } = await supabase
         .from('atlas_trades')
         .update({
-            close_price: closePrice,
-            result:      result,        // 'win' | 'loss'
-            pnl_brl:     pnlBRL,
+            exit_price:  closePrice,
+            result:      result,        // 'WIN' | 'LOSS'
+            pnl:         pnlBRL,
             status:      'closed',
-            closed_at:   new Date().toISOString(),
+            exit_reason: exitReason
         })
         .eq('id', tradeId);
 

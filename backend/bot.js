@@ -181,21 +181,21 @@ async function tick() {
 
             if (trade.direction === 'buy') {
                 if (currentPrice <= trade.stop_price) {
-                    result = 'loss';
+                    result = 'LOSS';
                     pnl = (currentPrice - trade.entry_price) * pointValue * lotes;
                     closed = true;
                 } else if (currentPrice >= trade.target_price) {
-                    result = 'win';
+                    result = 'WIN';
                     pnl = (currentPrice - trade.entry_price) * pointValue * lotes;
                     closed = true;
                 }
             } else {
                 if (currentPrice >= trade.stop_price) {
-                    result = 'loss';
+                    result = 'LOSS';
                     pnl = (trade.entry_price - currentPrice) * pointValue * lotes;
                     closed = true;
                 } else if (currentPrice <= trade.target_price) {
-                    result = 'win';
+                    result = 'WIN';
                     pnl = (trade.entry_price - currentPrice) * pointValue * lotes;
                     closed = true;
                 }
