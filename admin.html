@@ -77,54 +77,60 @@
                         <div class="admin-section-header">
                             <h2 class="admin-section-title"><i data-lucide="cpu"></i> Status dos Motores (IA)</h2>
                         </div>
-                        <div class="engine-status-grid">
-                            <!-- Populated by JS -->
-                            <div class="engine-card">
+                        <div class="engine-status-grid" id="enginesGrid">
+                            <div class="engine-card" data-engine="trend" style="cursor: pointer;">
                                 <div class="engine-info">
-                                    <div class="engine-icon"><i data-lucide="globe"></i></div>
-                                    <span class="font-medium text-sm">Agente Macro</span>
+                                    <div class="engine-icon"><i data-lucide="trending-up"></i></div>
+                                    <span class="font-medium text-sm">Agente Tendência</span>
                                 </div>
                                 <span class="badge badge-status-closed">Aguardando...</span>
                             </div>
-                            <div class="engine-card">
-                                <div class="engine-info">
-                                    <div class="engine-icon"><i data-lucide="activity"></i></div>
-                                    <span class="font-medium text-sm">Agente Fluxo</span>
-                                </div>
-                                <span class="badge badge-status-closed">Aguardando...</span>
-                            </div>
-                            <div class="engine-card">
-                                <div class="engine-info">
-                                    <div class="engine-icon"><i data-lucide="layers"></i></div>
-                                    <span class="font-medium text-sm">Agente Estrutural</span>
-                                </div>
-                                <span class="badge badge-status-closed">Aguardando...</span>
-                            </div>
-                            <div class="engine-card">
-                                <div class="engine-info">
-                                    <div class="engine-icon"><i data-lucide="bar-chart-2"></i></div>
-                                    <span class="font-medium text-sm">Agente Quant</span>
-                                </div>
-                                <span class="badge badge-status-closed">Aguardando...</span>
-                            </div>
-                            <div class="engine-card">
-                                <div class="engine-info">
-                                    <div class="engine-icon"><i data-lucide="git-merge"></i></div>
-                                    <span class="font-medium text-sm">Agente Correlação</span>
-                                </div>
-                                <span class="badge badge-status-closed">Aguardando...</span>
-                            </div>
-                            <div class="engine-card">
-                                <div class="engine-info">
-                                    <div class="engine-icon"><i data-lucide="message-square"></i></div>
-                                    <span class="font-medium text-sm">Agente Sentimento</span>
-                                </div>
-                                <span class="badge badge-status-closed">Aguardando...</span>
-                            </div>
-                            <div class="engine-card">
+                            <div class="engine-card" data-engine="momentum" style="cursor: pointer;">
                                 <div class="engine-info">
                                     <div class="engine-icon"><i data-lucide="zap"></i></div>
+                                    <span class="font-medium text-sm">Agente Momentum</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card" data-engine="meanReversion" style="cursor: pointer;">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="corner-down-left"></i></div>
+                                    <span class="font-medium text-sm">Agente Reversão à Média</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card" data-engine="volatility" style="cursor: pointer;">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="activity"></i></div>
                                     <span class="font-medium text-sm">Agente Volatilidade</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card" data-engine="correlation" style="cursor: pointer;">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="git-merge"></i></div>
+                                    <span class="font-medium text-sm">Agente Intermarket</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card" data-engine="smartMoney" style="cursor: pointer;">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="building"></i></div>
+                                    <span class="font-medium text-sm">Agente Smart Money</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card" data-engine="statistical" style="cursor: pointer;">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="clock"></i></div>
+                                    <span class="font-medium text-sm">Agente Estatístico</span>
+                                </div>
+                                <span class="badge badge-status-closed">Aguardando...</span>
+                            </div>
+                            <div class="engine-card" data-engine="breakout" style="cursor: pointer;">
+                                <div class="engine-info">
+                                    <div class="engine-icon"><i data-lucide="box"></i></div>
+                                    <span class="font-medium text-sm">Agente Breakout</span>
                                 </div>
                                 <span class="badge badge-status-closed">Aguardando...</span>
                             </div>
@@ -199,6 +205,37 @@
 
             </div>
         </main>
+    <!-- Modal de Detalhes do Motor -->
+    <div class="admin-modal-overlay" id="engineModal">
+        <div class="admin-modal glass-card">
+            <div class="admin-modal-header">
+                <h3 class="text-xl font-bold flex-center gap-2" id="engineModalTitle">
+                    <i data-lucide="cpu"></i> Nome do Motor
+                </h3>
+                <button class="btn-icon" onclick="document.getElementById('engineModal').classList.remove('active')">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="admin-modal-body">
+                <p id="engineModalDesc" class="text-muted mb-4">Descrição de como a inteligência artificial do motor funciona no longo prazo.</p>
+                
+                <h4 class="font-bold text-light mb-2">Peso da Estratégia por Mercado</h4>
+                <div class="admin-weights-grid">
+                    <div class="weight-card">
+                        <span class="weight-label">B3 Futuros<br>(WIN / WDO)</span>
+                        <span class="weight-value" id="weightB3">0%</span>
+                    </div>
+                    <div class="weight-card">
+                        <span class="weight-label">Forex Majors<br>(EUR/USD, GBP/USD...)</span>
+                        <span class="weight-value" id="weightForexMaj">0%</span>
+                    </div>
+                    <div class="weight-card">
+                        <span class="weight-label">Forex JPY Crosses<br>(USD/JPY, GBP/JPY...)</span>
+                        <span class="weight-value" id="weightForexJpy">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Core Scripts -->

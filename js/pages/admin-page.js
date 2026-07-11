@@ -28,6 +28,93 @@ document.addEventListener('DOMContentLoaded', () => {
         // Atualizar Uptime (mock)
         const uptimeEl = document.querySelectorAll('.admin-metric-value')[3];
         if(uptimeEl) uptimeEl.textContent = '99.9%';
+
+        setupEnginesModal();
+    }
+
+    const enginesData = {
+        trend: {
+            title: 'Agente Tendência',
+            icon: 'trending-up',
+            desc: 'Avalia o cruzamento de médias móveis (EMA9 e EMA21) para identificar a inércia do mercado. É altamente eficaz no longo prazo porque os mercados tendem a continuar o movimento antes de reverter.',
+            wB3: '20%', wMaj: '18%', wJpy: '20%'
+        },
+        momentum: {
+            title: 'Agente Momentum',
+            icon: 'zap',
+            desc: 'Analisa o Índice de Força Relativa (RSI) e a Taxa de Variação (ROC). Confirma a velocidade do movimento, sendo vital para evitar entradas em tendências já exauridas e detectar movimentos explosivos.',
+            wB3: '15%', wMaj: '15%', wJpy: '25%'
+        },
+        meanReversion: {
+            title: 'Agente Reversão à Média',
+            icon: 'corner-down-left',
+            desc: 'Mede distorções de preço em relação ao VWAP e Bandas de Bollinger. Mercados laterais são dominados por esta estratégia, pois o preço sempre tende a retornar à sua média justa.',
+            wB3: '3%', wMaj: '5%', wJpy: '2%'
+        },
+        volatility: {
+            title: 'Agente Volatilidade',
+            icon: 'activity',
+            desc: 'Baseado no ATR e largura das Bandas de Bollinger. Antecipa expansões explosivas (breakouts) quando identifica que o mercado está sofrendo compressão extrema (squeeze).',
+            wB3: '2%', wMaj: '0%', wJpy: '0%'
+        },
+        correlation: {
+            title: 'Agente Intermarket',
+            icon: 'git-merge',
+            desc: 'Lê o fluxo macroeconômico global (DXY, VIX, S&P 500, Petróleo, Ouro). É a camada de defesa mais forte do robô, evitando operações contra a força motriz do mercado mundial.',
+            wB3: '22%', wMaj: '12%', wJpy: '10%'
+        },
+        smartMoney: {
+            title: 'Agente Smart Money',
+            icon: 'building',
+            desc: 'Mapeia as zonas de liquidez institucionais (suportes e resistências estruturais). Identifica onde bancos e HFTs estão posicionados, evitando ser alvo de "stop hunts" (varredura de liquidez).',
+            wB3: '28%', wMaj: '30%', wJpy: '25%'
+        },
+        statistical: {
+            title: 'Agente Estatístico',
+            icon: 'clock',
+            desc: 'Avalia sazonalidade e horários de pico (abertura B3, sessões de Londres, NY e Tóquio). Aumenta a confiança apenas nos momentos em que há volume financeiro suficiente para deslocar o preço.',
+            wB3: '10%', wMaj: '20%', wJpy: '18%'
+        },
+        breakout: {
+            title: 'Agente Breakout',
+            icon: 'box',
+            desc: 'Mede rompimentos de caixas de consolidação com dupla confirmação. Atualmente desativado (peso 0) para evitar "falsos rompimentos", deixando o trabalho para o Agente Smart Money.',
+            wB3: '0%', wMaj: '0%', wJpy: '0%'
+        }
+    };
+
+    function setupEnginesModal() {
+        const modal = document.getElementById('engineModal');
+        if (!modal) return;
+        
+        const titleEl = document.getElementById('engineModalTitle');
+        const descEl = document.getElementById('engineModalDesc');
+        const wB3El = document.getElementById('weightB3');
+        const wMajEl = document.getElementById('weightForexMaj');
+        const wJpyEl = document.getElementById('weightForexJpy');
+
+        document.querySelectorAll('.engine-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const engineKey = card.getAttribute('data-engine');
+                const data = enginesData[engineKey];
+                if (data) {
+                    titleEl.innerHTML = `<i data-lucide="${data.icon}"></i> ${data.title}`;
+                    descEl.textContent = data.desc;
+                    wB3El.textContent = data.wB3;
+                    wMajEl.textContent = data.wMaj;
+                    wJpyEl.textContent = data.wJpy;
+                    
+                    lucide.createIcons({
+                        nameAttr: 'data-lucide',
+                        attrs: {
+                            class: 'lucide'
+                        }
+                    });
+                    
+                    modal.classList.add('active');
+                }
+            });
+        });
     }
 
     function populatePlansTable() {
