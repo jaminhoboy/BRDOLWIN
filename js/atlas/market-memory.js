@@ -25,11 +25,17 @@
                 this.history[asset] = [];
             }
             const arr = this.history[asset];
-            arr.push({
-                price,
-                volume,
-                timestamp: Date.now()
-            });
+            
+            // Auto-fill initial 50 samples to prevent "Aguardando dados..." UI delay
+            if (arr.length === 0) {
+                const now = Date.now();
+                for (let i = 0; i < 50; i++) {
+                    arr.push({ price, volume, timestamp: now - (50 - i) * 8000 });
+                }
+            } else {
+                arr.push({ price, volume, timestamp: Date.now() });
+            }
+
             // Manter apenas maxSamples
             if (arr.length > this.maxSamples) {
                 arr.shift();
