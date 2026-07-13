@@ -92,60 +92,54 @@
     }
   }
 
+  /**
+   * Busca DIVERSOS ativos em uma UNICA chamada para evitar rate limit
+   */
+  async function fetchYahooBatchQuotes(symbols) {
+    const symbolStr = symbols.join(',');
+    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbolStr}&t=${Date.now()}`;
+    const proxyUrl = `${ALLORIGINS_BASE}?disableCache=true&url=${encodeURIComponent(yahooUrl)}`;
+
+    const data = await fetchWithCache(proxyUrl, `yahoo_batch`, CACHE_TTL_MS);
+    if (!data || !data.contents) return null;
+
+    try {
+      const parsed = JSON.parse(data.contents);
+      const results = parsed.quoteResponse?.result;
+      if (!results || results.length === 0) return null;
+
+      const quotesMap = {};
+      results.forEach(quote => {
+          const prevClose = quote.regularMarketPreviousClose;
+          const currentPrice = quote.regularMarketPrice;
+          quotesMap[quote.symbol] = {
+            symbol: quote.symbol,
+            price: currentPrice,
+            previousClose: prevClose,
+            change: prevClose ? (currentPrice - prevClose) : 0,
+            changePercent: prevClose ? ((currentPrice - prevClose) / prevClose * 100) : 0,
+            currency: quote.currency,
+            exchangeName: quote.exchange,
+            timestamp: quote.regularMarketTime ? new Date(quote.regularMarketTime * 1000) : new Date(),
+          };
+      });
+      return quotesMap;
+    } catch (e) {
+      console.warn(`[BRDOLWIN API] Erro ao parsear Yahoo Batch:`, e.message);
+      return null;
+    }
+  }
+
   // ─── API Pública ──────────────────────────────────────
 
-  /**
-   * Busca cotação do Dólar comercial (USDBRL)
-   */
-  async function getDolar() {
-    return await fetchYahooQuote('BRL=X');
-  }
+  async function getDolar() { return await fetchYahooQuote('BRL=X'); }
+  async function getIbovespa() { return await fetchYahooQuote('^BVSP'); }
+  async function getDXY() { return await fetchYahooQuote('DX-Y.NYB'); }
+  async function getSP500() { return await fetchYahooQuote('ES=F'); }
+  async function getVIX() { return await fetchYahooQuote('^VIX'); }
+  async function getOilWTI() { return await fetchYahooQuote('CL=F'); }
+  async function getTreasury10Y() { return await fetchYahooQuote('^TNX'); }
 
-  /**
-   * Busca cotação do IBOVESPA
-   */
-  async function getIbovespa() {
-    return await fetchYahooQuote('^BVSP');
-  }
-
-  /**
-   * Busca DXY (Índice do Dólar)
-   */
-  async function getDXY() {
-    return await fetchYahooQuote('DX-Y.NYB');
-  }
-
-  /**
-   * Busca S&P 500 Futuro
-   */
-  async function getSP500() {
-    return await fetchYahooQuote('ES=F');
-  }
-
-  /**
-   * Busca VIX (Índice de Volatilidade)
-   */
-  async function getVIX() {
-    return await fetchYahooQuote('^VIX');
-  }
-
-  /**
-   * Busca Petróleo WTI
-   */
-  async function getOilWTI() {
-    return await fetchYahooQuote('CL=F');
-  }
-
-  /**
-   * Busca Treasury 10Y
-   */
-  async function getTreasury10Y() {
-    return await fetchYahooQuote('^TNX');
-  }
-
-  /**
-   * Busca EUR/USD
-   */
   async function getEURUSD() { return await fetchYahooQuote('EURUSD=X'); }
   async function getUSDJPY() { return await fetchYahooQuote('USDJPY=X'); }
   async function getGBPUSD() { return await fetchYahooQuote('GBPUSD=X'); }
@@ -158,26 +152,29 @@
   async function getEURGBP() { return await fetchYahooQuote('EURGBP=X'); }
 
   /**
-   * Busca todos os dados macro de uma vez
-   * Retorna um objeto com todos os ativos, null para os que falharem
+   * Busca todos os dados macro de uma vez (Usando Batch para evitar Rate Limit 429)
    */
   async function getAllMacro() {
-    const results = await Promise.allSettled([
-      getDXY(), getSP500(), getVIX(), getOilWTI(), getTreasury10Y(),
-      getDolar(), getIbovespa(),
-      getEURUSD(), getUSDJPY(), getGBPUSD(),
-      getAUDUSD(), getUSDCAD(), getUSDCHF(), getNZDUSD(),
-      getEURJPY(), getGBPJPY(), getEURGBP(),
-    ]);
-    const val = (r) => r.status === 'fulfilled' ? r.value : null;
+    const SYMBOLS = [
+      'DX-Y.NYB', 'ES=F', '^VIX', 'CL=F', '^TNX',
+      'BRL=X', '^BVSP',
+      'EURUSD=X', 'USDJPY=X', 'GBPUSD=X', 'AUDUSD=X', 'USDCAD=X', 'USDCHF=X', 'NZDUSD=X',
+      'EURJPY=X', 'GBPJPY=X', 'EURGBP=X'
+    ];
+    
+    const quotes = await fetchYahooBatchQuotes(SYMBOLS);
+    if (!quotes) return {};
+
+    const val = (sym) => quotes[sym] || null;
+
     return {
-      dxy: val(results[0]), sp500: val(results[1]), vix: val(results[2]),
-      oil: val(results[3]), treasury: val(results[4]),
-      dolar: val(results[5]), ibov: val(results[6]),
-      eurusd: val(results[7]), usdjpy: val(results[8]), gbpusd: val(results[9]),
-      audusd: val(results[10]), usdcad: val(results[11]), usdchf: val(results[12]),
-      nzdusd: val(results[13]), eurjpy: val(results[14]), gbpjpy: val(results[15]),
-      eurgbp: val(results[16]),
+      dxy: val('DX-Y.NYB'), sp500: val('ES=F'), vix: val('^VIX'),
+      oil: val('CL=F'), treasury: val('^TNX'),
+      dolar: val('BRL=X'), ibov: val('^BVSP'),
+      eurusd: val('EURUSD=X'), usdjpy: val('USDJPY=X'), gbpusd: val('GBPUSD=X'),
+      audusd: val('AUDUSD=X'), usdcad: val('USDCAD=X'), usdchf: val('USDCHF=X'),
+      nzdusd: val('NZDUSD=X'), eurjpy: val('EURJPY=X'), gbpjpy: val('GBPJPY=X'),
+      eurgbp: val('EURGBP=X'),
     };
   }
 
