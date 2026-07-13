@@ -93,19 +93,20 @@
   }
 
   /**
-   * Busca DIVERSOS ativos em uma UNICA chamada para evitar rate limit
+   * Busca DIVERSOS ativos em uma UNICA chamada usando a Serverless Function do Vercel
    */
   async function fetchYahooBatchQuotes(symbols) {
     const symbolStr = symbols.join(',');
-    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbolStr}&t=${Date.now()}`;
-    const proxyUrl = `${ALLORIGINS_BASE}?disableCache=true&url=${encodeURIComponent(yahooUrl)}`;
+    // Usamos nossa própria Serverless Function no Vercel (api/yahoo.js)
+    // para não depender de proxies públicos instáveis
+    const proxyUrl = `/api/yahoo?symbols=${encodeURIComponent(symbolStr)}`;
 
     const data = await fetchWithCache(proxyUrl, `yahoo_batch`, CACHE_TTL_MS);
-    if (!data || !data.contents) return null;
+    if (!data) return null;
 
     try {
-      const parsed = JSON.parse(data.contents);
-      const results = parsed.quoteResponse?.result;
+      // Como não usamos AllOrigins, a resposta já vem como objeto, não precisamos de JSON.parse(data.contents)
+      const results = data.quoteResponse?.result;
       if (!results || results.length === 0) return null;
 
       const quotesMap = {};
