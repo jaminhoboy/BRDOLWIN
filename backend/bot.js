@@ -28,7 +28,7 @@ const SETTINGS_SYNC_MS = parseInt(process.env.SETTINGS_SYNC_INTERVAL_MS || '3000
 // ─── Estado Global do Bot ─────────────────────────────
 const memory = new MarketMemory(200);
 
-let settings = { threshold: 70 };
+let settings = { threshold: 65 };
 
 // Perfis de peso por tipo de mercado
 const WEIGHTS_B3 = {
@@ -105,9 +105,24 @@ function isWithinTradingHours() {
     return true;
 }
 
+function isWithinForexHours() {
+    const hour = getBrasiliaHour();
+    const day = getBrasiliaDay();
+    if (day === 6) return false; // Fechado Sábado
+    if (day === 0 && hour < 18) return false; // Domingo abre às 18h
+    if (day === 5 && hour >= 18) return false; // Sexta fecha às 18h
+    return true;
+}
+
 function canTrade(context = {}) {
     if (risk.state.locked) return { allowed: false, reason: risk.state.lockReason };
-    if (!isWithinTradingHours()) return { allowed: false, reason: 'Fora do horário de operação' };
+    
+    const isB3 = ['win', 'wdo'].includes(context.asset);
+    if (isB3) {
+        if (!isWithinTradingHours()) return { allowed: false, reason: 'Fora do horário B3' };
+    } else {
+        if (!isWithinForexHours()) return { allowed: false, reason: 'Forex Fechado (Fim de semana)' };
+    }
 
     const drawPct = (risk.state.pnlDiario / risk.config.capitalInicial) * 100;
     if (drawPct <= -risk.config.maxDailyDrawdownPct) return { allowed: false, reason: 'Drawdown máximo atingido' };
