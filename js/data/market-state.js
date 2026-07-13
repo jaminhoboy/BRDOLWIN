@@ -268,10 +268,12 @@
       if (macroData.dolar) {
         state.dolarPrice = macroData.dolar.price;
         state.dolarChange = macroData.dolar.changePercent;
+        state.wdo = macroData.dolar; // Alimentar Atlas AI
       }
       if (macroData.ibov) {
         state.ibovPrice = macroData.ibov.price;
         state.ibovChange = macroData.ibov.changePercent;
+        state.win = macroData.ibov; // Alimentar Atlas AI
       }
 
       // Atualizar dados macro
